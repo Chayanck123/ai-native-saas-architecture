@@ -174,4 +174,6 @@ add-ons the manifests rely on. After that, GitHub Actions does the rest.
    first.
 
 All of this runs without long-lived cloud credentials. The one-time setup is
-in the [runbook](docs/runbook.md#first-time-setup).
+in the [runbook](docs/runbook.md#first-time-setup). Until it is done, the
+pipelines test and build everything but skip the AWS steps; setting the
+repository variable `ENABLE_AWS_DEPLOYMENTS` to `true` turns them on.
