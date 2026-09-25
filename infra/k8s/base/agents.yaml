@@ -1,0 +1,284 @@
+# agents: API + worker Deployments, Service, autoscaling and disruption budget.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agents
+  labels:
+    app.kubernetes.io/name: agents
+    app.kubernetes.io/component: identity
+    app.kubernetes.io/part-of: ainative
+  annotations:
+    # IAM role for service accounts (IRSA), created by Terraform.
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ainative-agents
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: agents-secrets
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets-manager
+  target:
+    name: agents-secrets
+  data:
+    - secretKey: DATABASE_URL
+      remoteRef:
+        key: ainative/agents
+        property: DATABASE_URL
+    - secretKey: ANTHROPIC_API_KEY
+      remoteRef:
+        key: ainative/agents
+        property: ANTHROPIC_API_KEY
+    # The Anthropic model id, chosen per environment next to its API key.
+    - secretKey: AGENTS_MODEL
+      remoteRef:
+        key: ainative/agents
+        property: AGENTS_MODEL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agents-api
+  labels:
+    app.kubernetes.io/name: agents
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: ainative
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agents
+      app.kubernetes.io/component: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: agents
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: ainative
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      serviceAccountName: agents
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: agents
+              app.kubernetes.io/component: api
+      containers:
+        - name: api
+          image: ainative/agents
+          args: ["api", "--port", "8000"]
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+            - secretRef:
+                name: agents-secrets
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                # Let the load balancer drain connections before shutdown.
+                command: ["sleep", "5"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agents-worker
+  labels:
+    app.kubernetes.io/name: agents
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: ainative
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agents
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: agents
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/part-of: ainative
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9100"
+    spec:
+      serviceAccountName: agents
+      # Workers finish their current batch on SIGTERM; leave room for long LLM calls.
+      terminationGracePeriodSeconds: 120
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: ainative/agents
+          args: ["worker", "--metrics-port", "9100"]
+          ports:
+            - name: metrics
+              containerPort: 9100
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+            - secretRef:
+                name: agents-secrets
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              memory: 768Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agents
+  labels:
+    app.kubernetes.io/name: agents
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: ainative
+spec:
+  selector:
+    app.kubernetes.io/name: agents
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: agents-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: agents-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+---
+# Event-driven autoscaling: add workers when tasks queue up in Redis Streams.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: agents-worker
+spec:
+  scaleTargetRef:
+    name: agents-worker
+  minReplicaCount: 2
+  maxReplicaCount: 50
+  cooldownPeriod: 120
+  triggers:
+    - type: redis-streams
+      metadata:
+        addressFromEnv: REDIS_ADDRESS
+        stream: "ainative:q:{agents}"
+        consumerGroup: workers
+        lagCount: "50"
+        enableTLS: "true"
+      authenticationRef:
+        name: redis-auth
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: agents-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agents
+      app.kubernetes.io/component: api

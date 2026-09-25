@@ -1,0 +1,16 @@
+environment           = "production"
+region                = "us-east-1"
+vpc_cidr              = "10.40.0.0/16"
+az_count              = 3
+single_nat_gateway    = false
+node_min_size         = 3
+node_desired_size     = 4
+node_max_size         = 20
+node_instance_types   = ["m7i.large", "m7i.xlarge"]
+aurora_min_acu        = 1
+aurora_max_acu        = 32
+aurora_instance_count = 2
+redis_node_type       = "cache.r7g.large"
+deletion_protection   = true
+beacon_allowed_origin = "https://www.example.com"
+github_repository     = "Chayanck123/ai-native-saas-architecture"

@@ -1,0 +1,66 @@
+# Zero-trust networking: deny all inbound traffic, then allow only the paths
+# the architecture needs. Egress stays open (DNS, PostgreSQL, Redis, LLM APIs).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress"]
+---
+# The gateway API is public (behind the ALB).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-public
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+      app.kubernetes.io/component: api
+  policyTypes: ["Ingress"]
+  ingress:
+    - ports:
+        - port: 8000
+---
+# Internal APIs accept traffic only from other platform pods.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-apis
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: ["knowledge", "agents", "billing", "growth"]
+      - key: app.kubernetes.io/component
+        operator: In
+        values: ["api"]
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: ainative
+      ports:
+        - port: 8000
+---
+# Prometheus (in the monitoring namespace) may scrape every pod.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-metrics-scraping
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: ainative
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 8000
+        - port: 9100

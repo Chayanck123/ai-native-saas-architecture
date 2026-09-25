@@ -1,0 +1,111 @@
+# Creates each service's database and least-privilege login before a rollout
+# (python -m platform_core.bootstrap). The databases are private to the VPC, so
+# this runs inside the cluster rather than on the CI runner.
+#
+# A template: the deploy workflow fills in the ${...} values with envsubst.
+# Names carry the workflow run id because a Job's pod template is immutable,
+# and the ExternalSecret is fetched fresh each run (RDS rotates the admin
+# password). The workflow deletes both afterwards.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: db-bootstrap-${RUN_ID}
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: db-bootstrap
+    app.kubernetes.io/part-of: ainative
+spec:
+  refreshInterval: "0"  # fetch once
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets-manager
+  target:
+    name: db-bootstrap-${RUN_ID}
+    creationPolicy: Owner  # deleted together with this ExternalSecret
+    template:
+      engineVersion: v2
+      data:
+        # The RDS-managed master secret holds only the username and password.
+        ADMIN_DATABASE_URL: >-
+          postgresql://{{ .admin_username | urlquery }}:{{ .admin_password | urlquery }}@${DB_HOST}:5432/postgres
+        SERVICE_DATABASE_URLS: >-
+          {"gateway": {{ .gateway | toJson }},
+          "knowledge": {{ .knowledge | toJson }},
+          "agents": {{ .agents | toJson }},
+          "billing": {{ .billing | toJson }},
+          "growth": {{ .growth | toJson }}}
+  data:
+    - secretKey: admin_username
+      remoteRef:
+        key: ${DB_ADMIN_SECRET_ARN}
+        property: username
+    - secretKey: admin_password
+      remoteRef:
+        key: ${DB_ADMIN_SECRET_ARN}
+        property: password
+    - secretKey: gateway
+      remoteRef:
+        key: ainative/gateway
+        property: DATABASE_URL
+    - secretKey: knowledge
+      remoteRef:
+        key: ainative/knowledge
+        property: DATABASE_URL
+    - secretKey: agents
+      remoteRef:
+        key: ainative/agents
+        property: DATABASE_URL
+    - secretKey: billing
+      remoteRef:
+        key: ainative/billing
+        property: DATABASE_URL
+    - secretKey: growth
+      remoteRef:
+        key: ainative/growth
+        property: DATABASE_URL
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-bootstrap-${RUN_ID}
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: db-bootstrap
+    app.kubernetes.io/part-of: ainative
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: db-bootstrap
+        app.kubernetes.io/part-of: ainative
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bootstrap
+          # Any service image works: they all ship platform_core.
+          image: ${IMAGE}
+          command: ["python", "-m", "platform_core.bootstrap"]
+          envFrom:
+            - secretRef:
+                name: db-bootstrap-${RUN_ID}
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

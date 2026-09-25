@@ -1,0 +1,22 @@
+[project]
+name = "agents-service"
+version = "0.1.0"
+description = "Agentic orchestration: planner / tool-using actor / critic loop on an LLM, with budgets and human-in-the-loop review"
+requires-python = ">=3.11"
+dependencies = [
+    "platform-core",
+    "anthropic>=1.0",
+]
+
+[project.scripts]
+agents-service = "agents_service.__main__:main"
+
+[tool.uv.sources]
+platform-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agents_service"]

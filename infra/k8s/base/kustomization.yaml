@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ainative
+labels:
+  - pairs:
+      app.kubernetes.io/managed-by: kustomize
+resources:
+  - namespace.yaml
+  - platform.yaml
+  - gateway.yaml
+  - knowledge.yaml
+  - agents.yaml
+  - billing.yaml
+  - growth.yaml
+  - ingress.yaml
+  - network-policies.yaml
+images:
+  - name: ainative/gateway
+    newTag: latest
+  - name: ainative/knowledge
+    newTag: latest
+  - name: ainative/agents
+    newTag: latest
+  - name: ainative/billing
+    newTag: latest
+  - name: ainative/growth
+    newTag: latest

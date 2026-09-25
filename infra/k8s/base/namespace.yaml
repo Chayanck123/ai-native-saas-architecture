@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ainative
+  labels:
+    # Enforce the "restricted" Pod Security Standard for every workload.
+    pod-security.kubernetes.io/enforce: restricted

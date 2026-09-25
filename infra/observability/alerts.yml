@@ -1,0 +1,100 @@
+# Alerting rules. Page on symptoms users feel (errors, latency, stuck work),
+# not on causes; use multi-window burn rates for the availability SLO.
+groups:
+  - name: slo
+    rules:
+      - record: service:http_error_ratio:rate5m
+        expr: |
+          sum by (service) (rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          sum by (service) (rate(http_requests_total[5m]))
+      - record: service:http_error_ratio:rate1h
+        expr: |
+          sum by (service) (rate(http_requests_total{status=~"5.."}[1h]))
+          /
+          sum by (service) (rate(http_requests_total[1h]))
+
+      # 99.9% availability SLO: a 14.4x burn rate spends 2% of the monthly error
+      # budget in one hour. Requiring both windows avoids paging on short blips.
+      - alert: GatewayErrorBudgetBurn
+        expr: |
+          service:http_error_ratio:rate1h{service="gateway"} > (14.4 * 0.001)
+          and
+          service:http_error_ratio:rate5m{service="gateway"} > (14.4 * 0.001)
+        labels:
+          severity: page
+        annotations:
+          summary: Public API is burning its error budget too fast
+          runbook_url: docs/runbook.md#gateway-error-budget-burn
+
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, service) (rate(http_request_duration_seconds_bucket[5m]))) > 1
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.service }} p95 latency above 1s for 10 minutes"
+          runbook_url: docs/runbook.md#high-latency-p95
+
+  - name: async-work
+    rules:
+      - alert: TasksDeadLettered
+        expr: sum by (service, task) (increase(tasks_processed_total{outcome="dead_lettered"}[15m])) > 0
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.service }}/{{ $labels.task }} tasks exhausted their retries"
+          runbook_url: docs/runbook.md#dead-lettered-tasks
+
+      - alert: QueueBacklogGrowing
+        expr: sum by (service) (queue_depth{state="ready"}) > 1000
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.service }} queue backlog above 1000 tasks - scale workers"
+          runbook_url: docs/runbook.md#queue-backlog-growing
+
+      - alert: RetryStorm
+        expr: sum by (service) (rate(tasks_processed_total{outcome="retried"}[5m])) > 5
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.service }} is retrying more than 5 tasks/s - a dependency is failing"
+          runbook_url: docs/runbook.md#retry-storm
+
+  - name: ai
+    rules:
+      - alert: LLMLatencyHigh
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(llm_request_duration_seconds_bucket[10m]))) > 60
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: LLM p95 latency above 60s
+          runbook_url: docs/runbook.md#llm-latency-high
+
+      - alert: TokenSpendSpike
+        expr: |
+          sum(rate(llm_tokens_total[1h])) > 3 * sum(rate(llm_tokens_total[1h] offset 1d))
+        for: 30m
+        labels:
+          severity: ticket
+        annotations:
+          summary: LLM token consumption is 3x yesterday's - check for runaway agents (cost)
+          runbook_url: docs/runbook.md#token-spend-spike
+
+  - name: growth
+    rules:
+      - alert: SignupsStopped
+        expr: sum(increase(business_events_total{event="signup"}[6h])) == 0
+        for: 1h
+        labels:
+          severity: ticket
+        annotations:
+          summary: No signups for 6 hours - the acquisition funnel may be broken
+          runbook_url: docs/runbook.md#signups-stopped

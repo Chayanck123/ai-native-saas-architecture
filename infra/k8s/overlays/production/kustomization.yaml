@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ainative
+resources:
+  - ../../base
+  - gateway-rollout.yaml
+patches:
+  # The canary Rollout owns the gateway pods; the Deployment only lends it its pod
+  # template. Kept at zero so re-applying manifests never starts pods that
+  # would take traffic with the new version outside the canary.
+  - target:
+      kind: Deployment
+      name: gateway-api
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 0
+  # ...so the autoscaler scales the Rollout.
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: gateway-api
+    patch: |
+      - op: replace
+        path: /spec/scaleTargetRef
+        value:
+          apiVersion: argoproj.io/v1alpha1
+          kind: Rollout
+          name: gateway-api
+images:
+  - name: ainative/gateway
+    newTag: latest

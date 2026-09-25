@@ -1,0 +1,73 @@
+# Plans and applies infra/terraform for one environment (called by infra.yml).
+#
+# Runs in the "<environment>-infra" GitHub environment, the only place the
+# Terraform role can be assumed from. Its variables: AWS_REGION, AWS_ROLE_ARN
+# (see the `github_environments` Terraform output) and TF_STATE_BUCKET.
+name: Terraform
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: staging or production
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  apply:
+    name: Terraform (${{ inputs.environment }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: ${{ inputs.environment }}-infra
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+      - name: Build the Lambda bundle
+        run: make package-lambdas
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.4
+          terraform_wrapper: false
+      - name: AWS credentials (OIDC, no stored keys)
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Init (remote state in S3, locked natively)
+        working-directory: infra/terraform
+        env:
+          STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: >-
+          terraform init
+          -backend-config="bucket=${STATE_BUCKET}"
+          -backend-config="key=platform/${ENVIRONMENT}.tfstate"
+          -backend-config="region=${AWS_REGION}"
+          -backend-config="use_lockfile=true"
+          -backend-config="encrypt=true"
+      - name: Plan
+        working-directory: infra/terraform
+        run: |
+          terraform plan -lock-timeout=5m -var-file="environments/${ENVIRONMENT}.tfvars" -out=tfplan
+          {
+            echo "### Terraform plan: ${ENVIRONMENT}"
+            echo '```'
+            terraform show -no-color tfplan | tail -c 60000
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Apply
+        working-directory: infra/terraform
+        run: terraform apply -lock-timeout=5m tfplan

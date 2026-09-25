@@ -1,0 +1,142 @@
+# Root of the uv workspace. This project itself is "virtual" (not installable);
+# it exists to pull every package and service into one development environment
+# and to hold shared tool configuration (ruff, mypy, pytest).
+[project]
+name = "ai-native-saas-platform"
+version = "0.1.0"
+description = "AI-native, multi-tenant, event-driven SaaS platform - reference implementation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "platform-core",
+    "gateway-service",
+    "knowledge-service",
+    "agents-service",
+    "billing-service",
+    "growth-service",
+    "serverless-functions",
+    "devstack",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*", "services/*"]
+
+[tool.uv.sources]
+platform-core = { workspace = true }
+gateway-service = { workspace = true }
+knowledge-service = { workspace = true }
+agents-service = { workspace = true }
+billing-service = { workspace = true }
+growth-service = { workspace = true }
+serverless-functions = { workspace = true }
+devstack = { workspace = true }
+
+# --------------------------------------------------------------------------- #
+# Tooling
+# --------------------------------------------------------------------------- #
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["infra"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "S",    # flake8-bandit (security)
+    "ASYNC",# flake8-async
+    "RUF",  # ruff-specific
+    "SIM",  # flake8-simplify
+]
+ignore = [
+    "S101",   # assert is fine in tests and for invariants
+    "S311",   # `random` is used for jitter/bucketing, not cryptography
+    "RUF012", # mutable class attributes are used deliberately for registries
+    "B008",   # FastAPI's Depends() in argument defaults is idiomatic
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S105", "S106", "S108"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "platform_core",
+    "gateway_service",
+    "knowledge_service",
+    "agents_service",
+    "billing_service",
+    "growth_service",
+    "serverless_functions",
+    "devstack",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+pretty = true
+plugins = ["pydantic.mypy"]
+files = [
+    "packages/platform-core/src",
+    "packages/devstack/src",
+    "services/gateway/src",
+    "services/knowledge/src",
+    "services/agents/src",
+    "services/billing/src",
+    "services/growth/src",
+    "services/serverless/src",
+    "scripts",
+]
+
+[[tool.mypy.overrides]]
+module = ["pgvector.*", "asyncpg.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# numpy only arrives through pgvector; the platform itself never imports it. On
+# Python 3.12+ the lockfile resolves a numpy whose stubs use 3.12-only syntax,
+# which mypy rejects while checking against the lowest supported Python (3.11).
+module = ["numpy", "numpy.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["packages", "services"]
+addopts = "-ra --strict-markers --import-mode=importlib"
+markers = [
+    "integration: tests that need real PostgreSQL (pgvector) and/or Redis (set DATABASE_URL / REDIS_URL)",
+]
+filterwarnings = [
+    "error::pytest.PytestUnraisableExceptionWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = [
+    "platform_core",
+    "gateway_service",
+    "knowledge_service",
+    "agents_service",
+    "billing_service",
+    "growth_service",
+    "serverless_functions",
+    "devstack",
+]

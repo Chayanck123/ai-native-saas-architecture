@@ -1,0 +1,16 @@
+environment           = "staging"
+region                = "us-east-1"
+vpc_cidr              = "10.41.0.0/16"
+az_count              = 2
+single_nat_gateway    = true
+node_min_size         = 2
+node_desired_size     = 2
+node_max_size         = 6
+node_instance_types   = ["m7i.large"]
+aurora_min_acu        = 0.5
+aurora_max_acu        = 4
+aurora_instance_count = 1
+redis_node_type       = "cache.t4g.medium"
+deletion_protection   = false
+beacon_allowed_origin = "https://staging.example.com"
+github_repository     = "Chayanck123/ai-native-saas-architecture"
