@@ -1,6 +1,8 @@
 # Applies the Terraform configuration (infra/terraform) - staging first, then
 # production once the "production-infra" environment's reviewers approve.
 # Changes to the Lambda functions ship here too: Terraform uploads the bundle.
+# Off (skipped) until the repository variable ENABLE_AWS_DEPLOYMENTS is true;
+# the first apply is run by hand (docs/runbook.md#first-time-setup).
 name: Infrastructure
 
 on:
@@ -26,6 +28,7 @@ concurrency:
 jobs:
   staging:
     name: Staging
+    if: vars.ENABLE_AWS_DEPLOYMENTS == 'true'
     uses: ./.github/workflows/terraform.yml
     with:
       environment: staging
@@ -36,6 +39,7 @@ jobs:
   production:
     name: Production
     needs: staging
+    if: vars.ENABLE_AWS_DEPLOYMENTS == 'true'
     uses: ./.github/workflows/terraform.yml
     with:
       environment: production

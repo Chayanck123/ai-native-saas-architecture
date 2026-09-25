@@ -5,6 +5,8 @@
 #   CI -> publish images (GHCR) -> staging -> production (canary gateway)
 #
 # Infrastructure changes go through infra.yml; setup is in docs/runbook.md.
+# The AWS deploys stay off (skipped, not failed) until the repository variable
+# ENABLE_AWS_DEPLOYMENTS is set to true at the end of that setup.
 name: CD
 
 on:
@@ -69,6 +71,7 @@ jobs:
   staging:
     name: Staging
     needs: images
+    if: vars.ENABLE_AWS_DEPLOYMENTS == 'true'
     uses: ./.github/workflows/deploy.yml
     with:
       environment: staging
@@ -80,6 +83,7 @@ jobs:
   production:
     name: Production
     needs: staging
+    if: vars.ENABLE_AWS_DEPLOYMENTS == 'true'
     uses: ./.github/workflows/deploy.yml
     with:
       environment: production

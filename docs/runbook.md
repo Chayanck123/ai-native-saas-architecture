@@ -115,10 +115,13 @@ point DNS at it:
 kubectl get ingress public-api -n ainative -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 ```
 
-### 8. First deploy
+### 8. Turn on deployments and deploy
 
-Merge to `main` (or run **CD** from the Actions tab). The pipeline builds the
-images, bootstraps each service's database and login, and rolls out.
+Until now the pipelines skip every AWS step, so a fresh repository stays green.
+In **Settings → Secrets and variables → Actions → Variables**, add the
+repository variable `ENABLE_AWS_DEPLOYMENTS` with the value `true`. Then merge
+to `main`, or run **CD** from the Actions tab. The pipeline builds the images,
+bootstraps each service's database and login, and rolls out.
 
 ## Deploying and rolling back
 
