@@ -1,0 +1,33 @@
+[project]
+name = "devstack"
+version = "0.1.0"
+description = "Runs every service in one process with in-memory infrastructure - for local development, demos and end-to-end tests"
+requires-python = ">=3.11"
+dependencies = [
+    "platform-core",
+    "gateway-service",
+    "knowledge-service",
+    "agents-service",
+    "billing-service",
+    "growth-service",
+    "serverless-functions",
+]
+
+[project.scripts]
+devstack = "devstack.__main__:main"
+
+[tool.uv.sources]
+platform-core = { workspace = true }
+gateway-service = { workspace = true }
+knowledge-service = { workspace = true }
+agents-service = { workspace = true }
+billing-service = { workspace = true }
+growth-service = { workspace = true }
+serverless-functions = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/devstack"]

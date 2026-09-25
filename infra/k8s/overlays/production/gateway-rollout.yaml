@@ -1,0 +1,65 @@
+# Progressive delivery for the public API (Argo Rollouts): new versions take a
+# small share of traffic first and are promoted only while Prometheus says they
+# are healthy; otherwise they are rolled back automatically.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: gateway-api
+spec:
+  replicas: 5
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+      app.kubernetes.io/component: api
+  # Reuse the Deployment's pod template (single source of truth); Argo scales the
+  # Deployment down as the Rollout takes over.
+  workloadRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gateway-api
+    scaleDown: progressively
+  strategy:
+    canary:
+      analysis:
+        templates:
+          - templateName: gateway-health
+        startingStep: 1
+      steps:
+        - setWeight: 20
+        - pause:
+            duration: 5m
+        - setWeight: 40
+        - pause:
+            duration: 10m
+        - setWeight: 80
+        - pause:
+            duration: 10m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: gateway-health
+spec:
+  metrics:
+    - name: success-rate
+      interval: 1m
+      failureLimit: 1
+      successCondition: result[0] >= 0.99
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{service="gateway",status!~"5.."}[2m]))
+            /
+            sum(rate(http_requests_total{service="gateway"}[2m]))
+    - name: p95-latency
+      interval: 1m
+      failureLimit: 1
+      successCondition: result[0] < 0.8
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.95,
+              sum by (le) (rate(http_request_duration_seconds_bucket{service="gateway"}[2m])))

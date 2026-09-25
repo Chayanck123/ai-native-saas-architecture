@@ -1,0 +1,44 @@
+# Applies the Terraform configuration (infra/terraform) - staging first, then
+# production once the "production-infra" environment's reviewers approve.
+# Changes to the Lambda functions ship here too: Terraform uploads the bundle.
+name: Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - infra/terraform/**
+      - infra/observability/alerts.yml
+      - services/serverless/**
+      - packages/platform-core/**
+      - uv.lock
+      - .github/workflows/infra.yml
+      - .github/workflows/terraform.yml
+  workflow_dispatch:
+
+permissions: {}
+
+# Never run two applies at once (the S3 state lock would also refuse).
+concurrency:
+  group: infrastructure
+  cancel-in-progress: false
+
+jobs:
+  staging:
+    name: Staging
+    uses: ./.github/workflows/terraform.yml
+    with:
+      environment: staging
+    permissions:
+      contents: read
+      id-token: write
+
+  production:
+    name: Production
+    needs: staging
+    uses: ./.github/workflows/terraform.yml
+    with:
+      environment: production
+    permissions:
+      contents: read
+      id-token: write

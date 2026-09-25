@@ -1,0 +1,7 @@
+# Copy to staging.backend.hcl and fill in (the state bucket is created once per
+# AWS account, with versioning enabled).
+bucket         = "ainative-terraform-state-<account-id>"
+key            = "platform/staging.tfstate"
+region         = "us-east-1"
+use_lockfile   = true # S3-native state locking, no DynamoDB table
+encrypt        = true

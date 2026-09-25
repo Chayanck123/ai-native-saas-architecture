@@ -1,0 +1,61 @@
+# Shared configuration for every service in the namespace.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-config
+data:
+  ENVIRONMENT: production
+  LOG_LEVEL: INFO
+  LOG_JSON: "true"
+  REDIS_PREFIX: ainative
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc.cluster.local:4318
+  KNOWLEDGE_URL: http://knowledge:8000
+  AGENTS_URL: http://agents:8000
+  BILLING_URL: http://billing:8000
+  GROWTH_URL: http://growth:8000
+  AGENTS_LLM_PROVIDER: anthropic  # model and key come from the agents secret
+  AGENTS_EFFORT: high
+  KNOWLEDGE_EMBEDDER: voyage
+---
+# Secrets never live in git: External Secrets Operator syncs them from AWS
+# Secrets Manager (created by Terraform) into Kubernetes Secrets.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: platform-secrets
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets-manager
+  target:
+    name: platform-secrets
+  data:
+    - secretKey: REDIS_URL
+      remoteRef:
+        key: ainative/platform
+        property: REDIS_URL
+    # host:port for the KEDA scalers, which read it from the worker's environment.
+    - secretKey: REDIS_ADDRESS
+      remoteRef:
+        key: ainative/platform
+        property: REDIS_ADDRESS
+    - secretKey: REDIS_PASSWORD
+      remoteRef:
+        key: ainative/platform
+        property: REDIS_PASSWORD
+    - secretKey: INTERNAL_JWT_SECRET
+      remoteRef:
+        key: ainative/platform
+        property: INTERNAL_JWT_SECRET
+---
+# Lets KEDA read the task-queue streams to autoscale workers.
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: redis-auth
+spec:
+  secretTargetRef:
+    - parameter: password
+      name: platform-secrets
+      key: REDIS_PASSWORD

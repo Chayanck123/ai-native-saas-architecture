@@ -1,0 +1,5 @@
+apiVersion: v2
+name: cluster-secret-store
+description: The AWS Secrets Manager store behind every ExternalSecret in infra/k8s.
+type: application
+version: 0.1.0

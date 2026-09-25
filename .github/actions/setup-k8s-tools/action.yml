@@ -1,0 +1,38 @@
+name: Set up Kubernetes tools
+description: >-
+  Install pinned, checksum-verified kustomize, kubeconform and the Argo Rollouts
+  kubectl plugin (kubectl itself comes with the runner image).
+
+runs:
+  using: composite
+  steps:
+    - name: Install kustomize, kubeconform and kubectl-argo-rollouts
+      shell: bash
+      env:
+        KUSTOMIZE_VERSION: v5.8.1
+        KUSTOMIZE_SHA256: 029a7f0f4e1932c52a0476cf02a0fd855c0bb85694b82c338fc648dcb53a819d
+        KUBECONFORM_VERSION: v0.8.0
+        KUBECONFORM_SHA256: 9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883
+        ARGO_ROLLOUTS_VERSION: v1.10.0
+        ARGO_ROLLOUTS_SHA256: 57a464e80c3e716076c9760e1d15ff06b853e3bcab3e22e30f4dba8a3e9f29b2
+      run: |
+        bin="$RUNNER_TEMP/k8s-tools"
+        mkdir -p "$bin"
+        cd "$RUNNER_TEMP"
+        fetch() {  # <file> <url> <sha256>
+          curl --fail --silent --show-error --location --retry 3 --output "$1" "$2"
+          echo "$3  $1" | sha256sum --check --strict -
+        }
+        fetch kustomize.tar.gz \
+          "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
+          "$KUSTOMIZE_SHA256"
+        tar -xzf kustomize.tar.gz -C "$bin" kustomize
+        fetch kubeconform.tar.gz \
+          "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+          "$KUBECONFORM_SHA256"
+        tar -xzf kubeconform.tar.gz -C "$bin" kubeconform
+        fetch "$bin/kubectl-argo-rollouts" \
+          "https://github.com/argoproj/argo-rollouts/releases/download/${ARGO_ROLLOUTS_VERSION}/kubectl-argo-rollouts-linux-amd64" \
+          "$ARGO_ROLLOUTS_SHA256"
+        chmod +x "$bin/kubectl-argo-rollouts"
+        echo "$bin" >> "$GITHUB_PATH"
