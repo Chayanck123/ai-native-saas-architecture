@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
@@ -1029,6 +1031,44 @@
               <button class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="regenerateApiKey()">
                 🔄 Regenerate API Key
               </button>
+
+              <!-- Production Payment Gateway & Live OTP Keys -->
+              <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                  <h4 style="font-size: 0.95rem; font-weight: 700; color: #38bdf8;">⚡ Live Gateways & Real Dispatch Keys</h4>
+                  <span style="font-size: 0.72rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 8px; border-radius: var(--radius-full); font-weight: 700;">PROD ENGINE</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 14px;">
+                  Configure your payment gateway and SMS/Email API keys to collect real payments and send real cellular SMS & emails to your customers.
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div>
+                    <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Razorpay Key ID (India - Cards, NetBanking, Autopay)</label>
+                    <input type="text" id="setting-razorpay-key" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="rzp_live_... or rzp_test_..." onchange="saveStoreSettings()">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Stripe Publishable Key (Global - USD Cards & Apple Pay)</label>
+                    <input type="text" id="setting-stripe-key" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="pk_live_... or pk_test_..." onchange="saveStoreSettings()">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Resend / SendGrid API Key (for Real In-Inbox Email Delivery)</label>
+                    <input type="password" id="setting-resend-key" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="re_... or SG...." onchange="saveStoreSettings()">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Fast2SMS / Twilio API Key (for Real Cellular SMS OTP)</label>
+                    <input type="password" id="setting-sms-key" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="Fast2SMS authorization key or Twilio token" onchange="saveStoreSettings()">
+                  </div>
+                  <div style="display: flex; gap: 8px; margin-top: 4px;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="saveStoreSettings()" style="flex: 1;">
+                      💾 Save Live Gateway Keys
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="testLiveOtpDispatch()" style="flex: 1;">
+                      📲 Test Live Dispatch
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1050,11 +1090,14 @@
         <button class="payment-tab-btn active" id="tab-pay-upi" onclick="switchPaymentMethod('upi')">
           <span>⚡</span> UPI & QR Code
         </button>
-        <button class="payment-tab-btn" id="tab-pay-bank" onclick="switchPaymentMethod('bank')">
-          <span>🏦</span> Bank Transfer (IMPS / NEFT)
+        <button class="payment-tab-btn" id="tab-pay-razorpay" onclick="switchPaymentMethod('razorpay')">
+          <span>🇮🇳</span> Razorpay Gateway
         </button>
         <button class="payment-tab-btn" id="tab-pay-card" onclick="switchPaymentMethod('card')">
           <span>💳</span> Card / Stripe
+        </button>
+        <button class="payment-tab-btn" id="tab-pay-bank" onclick="switchPaymentMethod('bank')">
+          <span>🏦</span> Bank IMPS
         </button>
       </div>
 
@@ -1298,6 +1341,28 @@
             </button>
           </div>
         </form>
+      </div>
+
+      <!-- METHOD 4: Official Razorpay Payment Gateway Section -->
+      <div id="payment-section-razorpay" style="display: none; padding: 10px 0;">
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-sm); padding: 20px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="font-weight: 800; color: #38bdf8; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+              <span>⚡</span> Razorpay Live Payment Gateway
+            </div>
+            <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: var(--radius-full); font-weight: 700;">PCI-DSS CERTIFIED</span>
+          </div>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+            Seamlessly pay with all Indian payment rails: Visa, Mastercard, RuPay, NetBanking across 50+ banks, UPI Autopay, Paytm Wallet, and Corporate Cards.
+          </p>
+          <div style="font-size: 0.78rem; color: #cbd5e1; background: rgba(99, 102, 241, 0.12); padding: 10px 14px; border-radius: 6px; border: 1px dashed rgba(99, 102, 241, 0.35);">
+            🔑 Active Key: <code id="razorpay-active-key-label" style="font-family: var(--font-mono); color: #38bdf8; font-weight: 700;">rzp_test_51O7Q24V0G</code>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-lg" id="btn-trigger-razorpay" onclick="launchRazorpayCheckout()" style="width: 100%; padding: 14px; font-size: 1.05rem;">
+          <span>⚡ Launch Razorpay Secure Checkout ➔</span>
+        </button>
       </div>
     </div>
   </div>

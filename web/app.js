@@ -350,7 +350,19 @@ function checkExistingSession() {
   if (saved) {
     try {
       activeMerchant = JSON.parse(saved);
-      if (!activeMerchant.invoices) activeMerchant.invoices = [...sampleInvoices];
+      // Clean canned Priya S. demo tickets from real registered stores (e.g. Asan)
+      if (activeMerchant && activeMerchant.storeName !== "AeroKicks Apparel") {
+        const hasCannedTickets = activeMerchant.tickets && activeMerchant.tickets.some(t => t.customer && t.customer.includes("Priya S."));
+        if (hasCannedTickets) {
+          activeMerchant.tickets = [];
+          activeMerchant.ticketsResolved = 0;
+          activeMerchant.costSaved = 0;
+          activeMerchant.creditsLeft = 50;
+          activeMerchant.totalCredits = 50;
+          saveMerchantToStore(activeMerchant);
+        }
+      }
+      if (!activeMerchant.invoices) activeMerchant.invoices = [];
       document.getElementById("nav-guest-actions").style.display = "none";
       document.getElementById("nav-user-actions").style.display = "flex";
       document.getElementById("nav-store-badge").textContent = `🛍️ ${activeMerchant.storeName}`;
@@ -488,7 +500,29 @@ function handlePilotRequestOtp(e) {
 
   startPilotCountdown(30);
   const channelLabel = contactType === "phone" ? "SMS & WhatsApp" : "Email";
-  showToast(`📩 OTP code sent via ${channelLabel} to ${contact}: ${pilotGeneratedOtp}`, "success");
+
+  // Dispatch via Serverless OTP Endpoint (Twilio / Fast2SMS / Resend)
+  fetch('/api/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      target: contact, 
+      channel: contactType,
+      customKeys: activeMerchant ? activeMerchant.integrations : undefined
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.deliveredLive) {
+      showToast(`📲 Real ${data.channel.toUpperCase()} delivered via ${data.provider} to ${contact}!`, "success");
+    } else {
+      if (data.otp) pilotGeneratedOtp = data.otp;
+      showToast(`📩 Verification code dispatched to ${contact}: ${pilotGeneratedOtp}`, "success");
+    }
+  })
+  .catch(() => {
+    showToast(`📩 Verification code dispatched to ${contact}: ${pilotGeneratedOtp}`, "success");
+  });
 }
 
 function startPilotCountdown(seconds) {
@@ -558,10 +592,11 @@ function handlePilotVerifyOtp(e) {
     contact: data.contact,
     email: data.contact.includes("@") ? data.contact : `founder@${data.storeName.toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
     plan: "14-Day Free Pilot",
-    creditsLeft: 48,
+    creditsLeft: 50,
     totalCredits: 50,
-    ticketsResolved: 14,
-    costSaved: 5600,
+    ticketsResolved: 0,
+    costSaved: 0,
+    isRealMerchant: true,
     apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
     tone: "friendly",
     whatsapp: data.contact.startsWith("+") ? data.contact : "+91 98765 43210",
@@ -572,25 +607,30 @@ function handlePilotVerifyOtp(e) {
     bankAcc: receiver.accNumber,
     bankIfsc: receiver.ifscCode,
     bankName: receiver.bankName,
+    integrations: {},
     policies: [
       {
         id: "p1",
-        title: "Standard 7-Day Returns & Exchanges",
-        content: "Items in brand new, unworn condition with tags attached and original packaging may be exchanged within 7 days of delivery."
+        title: `${data.storeName} - Standard Return & Exchange Terms`,
+        content: `Unworn items with original tags and packaging from ${data.storeName} may be returned or exchanged within 14 days of delivery.`
       },
       {
         id: "p2",
-        title: "Reverse Courier Pickup Policy",
-        content: "Reverse pickup available across India. A nominal ₹100 reverse pickup fee is adjusted against store credit."
-      },
-      {
-        id: "p3",
-        title: "Clearance & Custom Items",
-        content: "Custom tailored garments and clearance items are strictly non-refundable."
+        title: "Reverse Courier Pickup Logistics",
+        content: "Reverse pickups are scheduled via BlueDart/Shiprocket across 19,000+ pincodes within 24-48 business hours."
       }
     ],
-    tickets: [...sampleTickets],
-    invoices: [...sampleInvoices]
+    tickets: [],
+    invoices: [
+      {
+        id: "INV_PILOT_" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        plan: "14-Day Free Pilot Activation (50 Free Automated Answers)",
+        amount: "₹0.00 (Active Trial)",
+        status: "ACTIVE",
+        utr: "PILOT-ACT-" + Math.floor(100000 + Math.random() * 900000)
+      }
+    ]
   };
 
   saveMerchantToStore(activeMerchant);
@@ -879,6 +919,22 @@ function renderDashboard() {
     document.getElementById("setting-bank-name").value = activeMerchant.bankName;
   }
 
+  // Restore Production Gateway & Live OTP Keys
+  if (activeMerchant.integrations) {
+    if (document.getElementById("setting-razorpay-key")) {
+      document.getElementById("setting-razorpay-key").value = activeMerchant.integrations.razorpayKey || "";
+    }
+    if (document.getElementById("setting-stripe-key")) {
+      document.getElementById("setting-stripe-key").value = activeMerchant.integrations.stripeKey || "";
+    }
+    if (document.getElementById("setting-resend-key")) {
+      document.getElementById("setting-resend-key").value = activeMerchant.integrations.resendKey || "";
+    }
+    if (document.getElementById("setting-sms-key")) {
+      document.getElementById("setting-sms-key").value = activeMerchant.integrations.smsKey || "";
+    }
+  }
+
   // Embed snippet tailored
   const slug = activeMerchant.storeName.toLowerCase().replace(/[^a-z0-9]/g, "-");
   document.getElementById("dash-embed-snippet").textContent = `<!-- PolicyPilot AI Storefront Widget -->
@@ -898,6 +954,31 @@ function renderTicketTable() {
   const tbody = document.getElementById("ticket-table-body");
   if (!tbody || !activeMerchant) return;
   tbody.innerHTML = "";
+
+  if (!activeMerchant.tickets || activeMerchant.tickets.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td colspan="5" style="text-align: center; padding: 48px 24px;">
+        <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 12px rgba(99,102,241,0.5));">📡</div>
+        <div style="font-weight: 800; font-size: 1.15rem; color: #f8fafc; margin-bottom: 6px; letter-spacing: -0.01em;">
+          AI Agent Live & Listening on ${escapeHtml(activeMerchant.storeUrl || activeMerchant.storeName)}
+        </div>
+        <div style="color: var(--text-secondary); font-size: 0.9rem; max-width: 540px; margin: 0 auto 24px; line-height: 1.5;">
+          Zero customer tickets recorded yet. Every customer question asked via your storefront chat widget will appear here live with line-by-line policy citations.
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="switchDashTab('embed')">
+            📋 Copy 1-Line Shopify / Web Embed Code
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="triggerSimulatedTicket()">
+            ⚡ Send Real Test Inquiry to AI Agent
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    return;
+  }
 
   activeMerchant.tickets.forEach(t => {
     const tr = document.createElement("tr");
@@ -1463,16 +1544,27 @@ function switchPaymentMethod(method) {
   const upiTab = document.getElementById("tab-pay-upi");
   const bankTab = document.getElementById("tab-pay-bank");
   const cardTab = document.getElementById("tab-pay-card");
+  const rzpTab = document.getElementById("tab-pay-razorpay");
+
   const upiSection = document.getElementById("payment-section-upi");
   const bankSection = document.getElementById("payment-section-bank");
   const cardSection = document.getElementById("payment-section-card");
+  const rzpSection = document.getElementById("payment-section-razorpay");
 
-  [upiTab, bankTab, cardTab].forEach(t => t && t.classList.remove("active"));
-  [upiSection, bankSection, cardSection].forEach(s => s && (s.style.display = "none"));
+  [upiTab, bankTab, cardTab, rzpTab].forEach(t => t && t.classList.remove("active"));
+  [upiSection, bankSection, cardSection, rzpSection].forEach(s => s && (s.style.display = "none"));
 
   if (method === "upi") {
     if (upiTab) upiTab.classList.add("active");
     if (upiSection) upiSection.style.display = "block";
+  } else if (method === "razorpay") {
+    if (rzpTab) rzpTab.classList.add("active");
+    if (rzpSection) rzpSection.style.display = "block";
+    const keyLabel = document.getElementById("razorpay-active-key-label");
+    if (keyLabel) {
+      const customKey = (activeMerchant && activeMerchant.integrations && activeMerchant.integrations.razorpayKey);
+      keyLabel.textContent = customKey ? customKey : "rzp_test_51O7Q24V0G (Standard Gateway Mode)";
+    }
   } else if (method === "bank") {
     if (bankTab) bankTab.classList.add("active");
     if (bankSection) bankSection.style.display = "block";
@@ -1763,6 +1855,17 @@ function saveStoreSettings() {
   const bankNameInput = document.getElementById("setting-bank-name");
   if (bankNameInput) activeMerchant.bankName = bankNameInput.value.trim();
 
+  // Save Production Gateway & Live OTP Keys
+  if (!activeMerchant.integrations) activeMerchant.integrations = {};
+  const rzpInput = document.getElementById("setting-razorpay-key");
+  if (rzpInput) activeMerchant.integrations.razorpayKey = rzpInput.value.trim();
+  const stripeInput = document.getElementById("setting-stripe-key");
+  if (stripeInput) activeMerchant.integrations.stripeKey = stripeInput.value.trim();
+  const resendInput = document.getElementById("setting-resend-key");
+  if (resendInput) activeMerchant.integrations.resendKey = resendInput.value.trim();
+  const smsInput = document.getElementById("setting-sms-key");
+  if (smsInput) activeMerchant.integrations.smsKey = smsInput.value.trim();
+
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
 
   if (activeMerchant.bankHolder || activeMerchant.bankAcc || activeMerchant.upiId) {
@@ -1776,7 +1879,107 @@ function saveStoreSettings() {
     });
   }
 
-  showToast("Store settings, payout details & WhatsApp channel saved.", "info");
+  showToast("✅ Store settings, payout details & live gateway keys saved successfully!", "success");
+}
+
+function testLiveOtpDispatch() {
+  if (!activeMerchant) return;
+  const target = activeMerchant.contact || activeMerchant.email;
+  const channel = target.includes("@") ? "email" : "phone";
+
+  showToast(`📡 Testing live ${channel.toUpperCase()} dispatch to ${target}...`, "info");
+
+  fetch('/api/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      target: target,
+      channel: channel,
+      customKeys: activeMerchant.integrations
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.deliveredLive) {
+      showToast(`🎉 Real ${channel.toUpperCase()} successfully delivered via ${data.provider}! Check your inbox/phone!`, "success");
+    } else {
+      showToast(`⚠️ Live key not detected in Vercel Env. Auto-code: ${data.otp}. Add FAST2SMS / RESEND keys in settings for live cellular/email dispatch!`, "warning");
+    }
+  })
+  .catch(err => {
+    showToast(`Error dispatching OTP: ${err.message}`, "error");
+  });
+}
+
+// Razorpay Official Checkout Engine
+function launchRazorpayCheckout() {
+  const planName = (pendingPlan && pendingPlan.name) ? pendingPlan.name : "Starter Plan";
+  const inrAmount = isPaymentTestMode ? 1.00 : ((pendingPlan && pendingPlan.inr) ? pendingPlan.inr : 4999);
+  
+  const customRzpKey = (activeMerchant && activeMerchant.integrations && activeMerchant.integrations.razorpayKey) 
+    || "rzp_test_51O7Q24V0G"; // Default fallback test key
+
+  if (typeof Razorpay === "undefined") {
+    showToast("⚠️ Razorpay SDK is loading. Please check internet connection.", "warning");
+    return;
+  }
+
+  const options = {
+    key: customRzpKey,
+    amount: Math.round(inrAmount * 100), // amount in paise
+    currency: "INR",
+    name: "PolicyPilot AI",
+    description: isPaymentTestMode ? "₹1.00 Self-Transfer Test" : `${planName} Subscription`,
+    image: "https://getpolicypilot.vercel.app/favicon.ico",
+    prefill: {
+      name: (activeMerchant && activeMerchant.storeName) || "Store Merchant",
+      email: (activeMerchant && activeMerchant.email) || "merchant@store.com",
+      contact: (activeMerchant && activeMerchant.contact) || "+919876543210"
+    },
+    theme: {
+      color: "#6366f1"
+    },
+    handler: function (response) {
+      closePaymentModal();
+      showToast(`🎉 Real Razorpay Payment Confirmed! Payment ID: ${response.razorpay_payment_id}`, "success");
+      
+      if (!activeMerchant) {
+        quickLoginDemoStore();
+      }
+      
+      const newInvoice = {
+        id: "INV_RZP_" + response.razorpay_payment_id.slice(-8).toUpperCase(),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        plan: `${planName} (Razorpay Official Gateway)`,
+        amount: `₹${inrAmount.toLocaleString()}`,
+        status: "PAID",
+        utr: response.razorpay_payment_id
+      };
+      
+      activeMerchant.plan = `${planName} (₹${inrAmount.toLocaleString()}/mo)`;
+      activeMerchant.creditsLeft += (pendingPlan && pendingPlan.credits) ? pendingPlan.credits : 1000;
+      activeMerchant.totalCredits += (pendingPlan && pendingPlan.credits) ? pendingPlan.credits : 1000;
+      if (!activeMerchant.invoices) activeMerchant.invoices = [];
+      activeMerchant.invoices.unshift(newInvoice);
+      
+      saveMerchantToStore(activeMerchant);
+      renderDashboard();
+      switchView("dashboard");
+      switchDashTab("billing");
+    },
+    modal: {
+      ondismiss: function() {
+        showToast("Payment window closed.", "info");
+      }
+    }
+  };
+
+  try {
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } catch (err) {
+    showToast(`Razorpay checkout initialization error: ${err.message}`, "error");
+  }
 }
 
 function copyApiKey() {
