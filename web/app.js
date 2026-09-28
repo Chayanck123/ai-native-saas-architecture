@@ -2380,6 +2380,14 @@ function openLoginModal() {
 function closeLoginModal() {
   document.getElementById("login-modal").style.display = "none";
 }
+function switchToSignUpModal() {
+  closeLoginModal();
+  openPilotModal("Login Switcher");
+}
+function switchToSignInModal() {
+  closePilotModal();
+  openLoginModal();
+}
 function closeModalOnBackdrop(e) {
   if (e.target.id === "pilot-modal") closePilotModal();
   if (e.target.id === "login-modal") closeLoginModal();
