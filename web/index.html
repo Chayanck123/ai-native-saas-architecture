@@ -891,6 +891,14 @@
                       <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Bank Name & Branch</label>
                       <input type="text" id="setting-bank-name" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. HDFC Bank, Koramangala" onchange="saveStoreSettings()">
                     </div>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="saveStoreSettings()" style="flex: 1;">
+                        💾 Save Payout & Bank Details
+                      </button>
+                      <button type="button" class="btn btn-primary btn-sm" onclick="testSelfTransferFromSettings()" style="flex: 1; background: #10b981; border-color: #059669; color: white;">
+                        🧪 Test Self-Transfer (₹1.00)
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -935,56 +943,40 @@
         </button>
       </div>
 
-      <div style="text-align: center; margin-bottom: 16px;">
+      <div style="text-align: center; margin-bottom: 8px;">
         <h3 style="font-size: 1.3rem; font-weight: 800;" id="modal-checkout-title">Subscribe to Starter Plan</h3>
         <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
           Billed monthly. Cancel anytime with one click in your dashboard.
         </p>
-        <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin: 8px 0;" id="modal-checkout-price">
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin: 6px 0;" id="modal-checkout-price">
           ₹4,999 <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span>
+        </div>
+
+        <!-- Amount Mode Toggle (Subscription vs ₹1 Self-Transfer Test) -->
+        <div class="payment-amount-toggle">
+          <button type="button" class="amount-toggle-btn active-sub" id="btn-amount-sub" onclick="setPaymentTestMode(false)">
+            ⚡ Plan (<span id="btn-sub-amount-label">₹4,999</span>)
+          </button>
+          <button type="button" class="amount-toggle-btn" id="btn-amount-test" onclick="setPaymentTestMode(true)">
+            🧪 Test Self-Transfer (₹1.00)
+          </button>
+        </div>
+
+        <!-- Self-Transfer Alert Banner -->
+        <div class="self-transfer-alert" id="self-transfer-notice" style="display: none;">
+          <span style="font-size: 1.2rem;">🧪</span>
+          <div style="text-align: left;">
+            <strong>Self-Transfer Test Mode (₹1.00 Active):</strong><br>
+            Pay ₹1 from your other bank account or GPay/PhonePe. Check your receiving account to confirm ₹1 deposited instantly!
+          </div>
         </div>
       </div>
 
       <!-- METHOD 1: UPI & QR Code Section -->
       <div id="payment-section-upi">
         <div class="upi-qr-box" id="upi-qr-container">
-          <!-- Dynamic High-Resolution SVG QR Code -->
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="100" height="100" fill="white"/>
-            <!-- Corner Markers -->
-            <rect x="10" y="10" width="24" height="24" rx="3" fill="#0f172a"/>
-            <rect x="14" y="14" width="16" height="16" rx="2" fill="white"/>
-            <rect x="18" y="18" width="8" height="8" rx="1" fill="#6366f1"/>
-
-            <rect x="66" y="10" width="24" height="24" rx="3" fill="#0f172a"/>
-            <rect x="70" y="14" width="16" height="16" rx="2" fill="white"/>
-            <rect x="74" y="18" width="8" height="8" rx="1" fill="#6366f1"/>
-
-            <rect x="10" y="66" width="24" height="24" rx="3" fill="#0f172a"/>
-            <rect x="14" y="70" width="16" height="16" rx="2" fill="white"/>
-            <rect x="18" y="74" width="8" height="8" rx="1" fill="#6366f1"/>
-
-            <!-- Pattern Blocks -->
-            <rect x="40" y="12" width="6" height="6" fill="#0f172a"/>
-            <rect x="50" y="18" width="6" height="6" fill="#0f172a"/>
-            <rect x="42" y="28" width="6" height="6" fill="#0f172a"/>
-            <rect x="52" y="38" width="6" height="6" fill="#0f172a"/>
-            <rect x="12" y="42" width="6" height="6" fill="#0f172a"/>
-            <rect x="24" y="48" width="6" height="6" fill="#0f172a"/>
-            <rect x="34" y="52" width="6" height="6" fill="#0f172a"/>
-            <rect x="62" y="46" width="6" height="6" fill="#0f172a"/>
-            <rect x="74" y="52" width="6" height="6" fill="#0f172a"/>
-            <rect x="84" y="42" width="6" height="6" fill="#0f172a"/>
-            <rect x="42" y="66" width="6" height="6" fill="#0f172a"/>
-            <rect x="52" y="72" width="6" height="6" fill="#0f172a"/>
-            <rect x="62" y="68" width="6" height="6" fill="#0f172a"/>
-            <rect x="74" y="76" width="6" height="6" fill="#0f172a"/>
-            <rect x="84" y="82" width="6" height="6" fill="#0f172a"/>
-
-            <!-- Center Badge -->
-            <rect x="40" y="40" width="20" height="20" rx="4" fill="#6366f1"/>
-            <text x="50" y="54" font-size="11" font-weight="bold" fill="white" text-anchor="middle">UPI</text>
-          </svg>
+          <!-- Dynamic High-Resolution QR Code -->
+          <img id="upi-qr-image" class="qr-code-img" src="" alt="Dynamic UPI Payment QR Code">
         </div>
 
         <div class="upi-apps-row">
@@ -1005,14 +997,55 @@
         </div>
 
         <!-- Mobile 1-Tap Pay Deep Link -->
-        <a id="btn-upi-intent-link" href="upi://pay?pa=policypilot@okhdfcbank&pn=PolicyPilot%20AI&am=4999.00&cu=INR&tn=Starter%20Plan%20Subscription" class="btn btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 6px; font-weight: 700; color: #a5b4fc; border-color: rgba(99, 102, 241, 0.4); text-decoration: none;">
+        <a id="btn-upi-intent-link" href="#" class="btn btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 6px; font-weight: 700; color: #a5b4fc; border-color: rgba(99, 102, 241, 0.4); text-decoration: none;">
           📱 Tap to Pay on Mobile (GPay / PhonePe / Paytm / CRED)
         </a>
 
+        <!-- Receiver Details Inline Config Drawer Toggle -->
+        <button type="button" class="receiver-config-toggle" onclick="toggleReceiverConfigDrawer()">
+          <span>⚙️ Configure Receiving Bank / UPI Details</span>
+          <span id="receiver-drawer-arrow">▼</span>
+        </button>
+
+        <div class="receiver-config-drawer" id="receiver-config-drawer">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #a5b4fc; margin-bottom: 8px;">
+            🏦 Edit Where You Receive Payments & Test Transfers:
+          </div>
+          <form onsubmit="handleSaveReceiverConfig(event)">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Your Receiving UPI ID / VPA</label>
+                <input type="text" id="drawer-upi-id" class="custom-input" style="width: 100%; font-size: 0.82rem;" placeholder="e.g. yourname@okhdfcbank or 9876543210@paytm" required>
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Account Holder Name</label>
+                <input type="text" id="drawer-bank-holder" class="custom-input" style="width: 100%; font-size: 0.82rem;" placeholder="e.g. Chayan Kumar / PolicyPilot" required>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Bank Account Number</label>
+                  <input type="text" id="drawer-bank-acc" class="custom-input" style="width: 100%; font-size: 0.82rem;" placeholder="e.g. 50100492810481" required>
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">IFSC Code</label>
+                  <input type="text" id="drawer-bank-ifsc" class="custom-input" style="width: 100%; font-size: 0.82rem;" placeholder="e.g. HDFC0000123" required>
+                </div>
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Bank Name & Branch</label>
+                <input type="text" id="drawer-bank-name" class="custom-input" style="width: 100%; font-size: 0.82rem;" placeholder="e.g. HDFC Bank, Koramangala">
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 4px;">
+                💾 Save & Update Checkout Now
+              </button>
+            </div>
+          </form>
+        </div>
+
         <form id="upi-payment-form" onsubmit="handleUpiPaymentSubmit(event)">
-          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
             <div>
-              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">12-Digit Bank UTR / Reference No. (from GPay / PhonePe screen)</label>
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">12-Digit Bank UTR / Reference No. (from GPay / PhonePe / Banking app)</label>
               <input type="text" id="upi-utr-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. 428190284719" maxlength="18">
             </div>
 
@@ -1034,7 +1067,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-lg" id="btn-upi-confirm" style="width: 100%; margin-top: 6px;">
-              ⚡ Confirm UPI Payment & Activate Plan ➔
+              ⚡ Confirm Payment & Activate Plan ➔
             </button>
           </div>
         </form>
@@ -1080,6 +1113,18 @@
               <span style="color: var(--emerald); font-weight: 600;">IMPS (Instant 2-Sec Settlement) / NEFT / RTGS</span>
             </div>
           </div>
+        </div>
+
+        <!-- How to self-test IMPS tip box -->
+        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px; font-size: 0.8rem; line-height: 1.45;">
+          <div style="font-weight: 700; color: #a5b4fc; margin-bottom: 4px;">💡 How to Self-Transfer Test via Netbanking / IMPS:</div>
+          <ol style="padding-left: 18px; margin: 0; color: var(--text-secondary);">
+            <li>Open your secondary bank app (SBI, ICICI, Kotak, Axis, etc.).</li>
+            <li>Choose <strong>Quick Transfer / IMPS (Without Adding Beneficiary)</strong>.</li>
+            <li>Paste Account Number & IFSC above, enter ₹1.00 or plan amount, and submit.</li>
+            <li>Check your primary bank app/SMS to confirm instant deposit.</li>
+            <li>Paste the 12-digit IMPS UTR number below to activate.</li>
+          </ol>
         </div>
 
         <form id="bank-transfer-form" onsubmit="handleBankPaymentSubmit(event)">
@@ -1142,18 +1187,18 @@
     </div>
   </div>
 
-  <!-- Pilot Signup Modal (New Users with OTP) -->
+  <!-- Pilot Signup Modal (New Users with OTP: Email or Phone) -->
   <div class="modal-overlay" id="pilot-modal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content">
       <button class="modal-close" onclick="closePilotModal()">&times;</button>
       
-      <!-- STEP 1: Store Details & Phone/Email Input -->
+      <!-- STEP 1: Store Details & Phone/Email Selection -->
       <div id="pilot-step-details">
         <div style="text-align: center; margin-bottom: 20px;">
           <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
           <h3 style="font-size: 1.4rem; font-weight: 800;">Get Your 14-Day Free Pilot</h3>
           <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
-            Enter your store details. You will receive a 6-digit OTP to verify your account.
+            Enter your store details. Select Phone or Email to receive your 6-digit OTP.
           </p>
         </div>
 
@@ -1167,10 +1212,48 @@
               <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="store-url-input">Store Website URL</label>
               <input type="url" id="store-url-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="https://yourstore.com" required>
             </div>
+
+            <!-- OTP Channel Selector -->
             <div>
-              <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="founder-contact-input">Mobile Phone (or Work Email)</label>
-              <input type="text" id="founder-contact-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="+91 98765 43210 or founder@yourstore.com" required value="+91 98765 43210">
+              <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; display: block; margin-bottom: 6px;">
+                Choose How to Receive Verification OTP
+              </label>
+              <div class="auth-channel-selector">
+                <button type="button" class="channel-tab-btn active" id="pilot-btn-channel-phone" onclick="switchPilotChannel('phone')">
+                  <span>📱</span> Mobile (SMS/WhatsApp)
+                </button>
+                <button type="button" class="channel-tab-btn" id="pilot-btn-channel-email" onclick="switchPilotChannel('email')">
+                  <span>✉️</span> Work Email
+                </button>
+              </div>
+
+              <!-- Phone Input Container -->
+              <div id="pilot-channel-phone-container">
+                <div class="phone-input-row">
+                  <select id="pilot-phone-code" class="phone-code-select">
+                    <option value="+91">+91 🇮🇳</option>
+                    <option value="+1">+1 🇺🇸</option>
+                    <option value="+44">+44 🇬🇧</option>
+                    <option value="+971">+971 🇦🇪</option>
+                    <option value="+65">+65 🇸🇬</option>
+                    <option value="+61">+61 🇦🇺</option>
+                  </select>
+                  <input type="tel" id="pilot-phone-number" class="custom-input" style="flex: 1;" placeholder="98765 43210" value="9876543210">
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                  ⚡ 6-digit OTP code dispatched via instant SMS & WhatsApp
+                </div>
+              </div>
+
+              <!-- Email Input Container (hidden by default) -->
+              <div id="pilot-channel-email-container" style="display: none;">
+                <input type="email" id="pilot-email-address" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="founder@yourstore.com">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                  ⚡ 6-digit OTP code dispatched directly to your work email inbox
+                </div>
+              </div>
             </div>
+
             <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-pilot-otp" style="width: 100%; margin-top: 8px;">
               ⚡ Send OTP Verification Code ➔
             </button>
@@ -1212,14 +1295,14 @@
           </button>
 
           <button type="button" class="btn btn-secondary btn-sm" onclick="backToPilotDetails()" style="width: 100%; margin-top: 8px;">
-            ← Edit Store Details
+            ← Change Phone / Email
           </button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Sign In Modal (Old Users with OTP) -->
+  <!-- Sign In Modal (Old Users with OTP: Email or Phone) -->
   <div class="modal-overlay" id="login-modal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content">
       <button class="modal-close" onclick="closeLoginModal()">&times;</button>
@@ -1230,16 +1313,41 @@
           <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
           <h3 style="font-size: 1.4rem; font-weight: 800;">Sign In to Store Dashboard</h3>
           <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
-            Enter your registered mobile number or email for instant OTP sign in.
+            Choose your registered phone or work email for instant OTP sign in.
           </p>
         </div>
 
         <form onsubmit="handleLoginRequestOtp(event)">
           <div style="display: flex; flex-direction: column; gap: 14px;">
-            <div>
-              <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Mobile Phone or Work Email</label>
-              <input type="text" id="login-identifier-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="+91 98765 43210 or founder@store.in" required value="+91 98765 43210">
+            <!-- Channel Switcher -->
+            <div class="auth-channel-selector">
+              <button type="button" class="channel-tab-btn active" id="login-btn-channel-phone" onclick="switchLoginChannel('phone')">
+                <span>📱</span> Mobile Number
+              </button>
+              <button type="button" class="channel-tab-btn" id="login-btn-channel-email" onclick="switchLoginChannel('email')">
+                <span>✉️</span> Work Email
+              </button>
             </div>
+
+            <!-- Phone Login Input -->
+            <div id="login-channel-phone-container">
+              <div class="phone-input-row">
+                <select id="login-phone-code" class="phone-code-select">
+                  <option value="+91">+91 🇮🇳</option>
+                  <option value="+1">+1 🇺🇸</option>
+                  <option value="+44">+44 🇬🇧</option>
+                  <option value="+971">+971 🇦🇪</option>
+                  <option value="+65">+65 🇸🇬</option>
+                </select>
+                <input type="tel" id="login-phone-number" class="custom-input" style="flex: 1;" placeholder="98765 43210" value="9876543210">
+              </div>
+            </div>
+
+            <!-- Email Login Input (hidden by default) -->
+            <div id="login-channel-email-container" style="display: none;">
+              <input type="email" id="login-email-address" class="custom-input" style="width: 100%;" placeholder="founder@yourstore.in">
+            </div>
+
             <button type="submit" class="btn btn-primary btn-lg" id="btn-login-send-otp" style="width: 100%;">
               ⚡ Send OTP Verification Code ➔
             </button>
