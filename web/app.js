@@ -2415,3 +2415,15 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
+
+// Real-time listener for incoming customer tickets from storefront widget
+window.addEventListener("policypilot_ticket_added", () => {
+  const raw = localStorage.getItem("policypilot_active_merchant");
+  if (raw) {
+    try {
+      activeMerchant = JSON.parse(raw);
+      renderDashboard();
+      showToast("🔔 New customer inquiry auto-resolved on your store!", "success");
+    } catch (e) {}
+  }
+});

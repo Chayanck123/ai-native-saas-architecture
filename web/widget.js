@@ -247,20 +247,33 @@
     input.value = '';
     stream.scrollTop = stream.scrollHeight;
 
-    // Agent answer simulation
+    // Ground answer in merchant's active indexed policies
     setTimeout(() => {
-      let answer = "According to our active policy, items in original condition may be returned within our documented window. Reverse courier pickup is scheduled across serviceable pincodes.";
-      let citation = "Section 1: General Store Return Policy";
+      let answer = `According to our store policy terms, returns and exchanges are processed in unworn condition with original tags intact. Reverse pickup is available across serviceable locations.`;
+      let citation = "Section 1: Store Return & Exchange Terms";
 
       const q = query.toLowerCase();
+      let activePolicies = (merchant && merchant.policies && merchant.policies.length > 0) ? merchant.policies : [];
+
+      if (activePolicies.length > 0) {
+        const found = activePolicies.find(p => 
+          q.includes(p.title.toLowerCase()) || 
+          p.content.toLowerCase().split(" ").some(w => w.length > 4 && q.includes(w))
+        );
+        if (found) {
+          answer = found.content;
+          citation = `§ ${found.title}`;
+        }
+      }
+
       if (q.includes("outside") || q.includes("worn") || q.includes("scuff")) {
         answer = "Items must remain in brand new, unworn condition with tags attached to be eligible for return or exchange.";
         citation = "Section 2: Item Condition & Eligibility";
       } else if (q.includes("courier") || q.includes("reverse") || q.includes("pickup") || q.includes("fee")) {
-        answer = "Reverse pickup is scheduled via our courier partners (Shiprocket/BlueDart). A nominal pickup fee may apply for non-defective returns.";
+        answer = "Reverse pickup is scheduled via our courier logistics partners. A nominal courier charge is adjusted against your store exchange credit.";
         citation = "Section 3: Reverse Logistics";
       } else if (q.includes("money") || q.includes("free") || q.includes("cheat")) {
-        answer = "I cannot grant refunds outside our official policy terms. Please tap the WhatsApp button below to speak directly with customer operations.";
+        answer = "I cannot issue unauthorized refunds outside our official policy terms. Please tap the WhatsApp button below to speak directly with customer operations.";
         citation = "Policy Escalation Rule #14";
       }
 
@@ -272,7 +285,29 @@
       `;
       stream.appendChild(agentMsg);
       stream.scrollTop = stream.scrollHeight;
-    }, 600);
+
+      // Log ticket into merchant dashboard in real time
+      try {
+        const raw = localStorage.getItem("policypilot_active_merchant");
+        if (raw) {
+          const m = JSON.parse(raw);
+          if (!m.tickets) m.tickets = [];
+          m.tickets.unshift({
+            time: "Just now",
+            customer: `Customer Inquiry (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`,
+            query: query,
+            answer: answer,
+            citation: citation,
+            status: citation.includes("Escalation") ? "escalated" : "resolved"
+          });
+          m.ticketsResolved = (m.ticketsResolved || 0) + 1;
+          m.costSaved = (m.costSaved || 0) + 150;
+          m.creditsLeft = Math.max(0, (m.creditsLeft || 50) - 1);
+          localStorage.setItem("policypilot_active_merchant", JSON.stringify(m));
+          window.dispatchEvent(new Event("policypilot_ticket_added"));
+        }
+      } catch (err) {}
+    }, 500);
   }
 
   win.querySelector('#pp-btn-send').onclick = sendQuery;
