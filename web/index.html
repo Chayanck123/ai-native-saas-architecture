@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PolicyPilot AI — Zero-Hallucination AI Support Copilot for E-Commerce & Shopify</title>
   <meta name="description" content="Automate 70% of customer support tickets for your online store with guaranteed zero hallucinations. Instant policy citations, human routing, and easy Shopify integration.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
   <script defer src="/_vercel/insights/script.js"></script>
@@ -15,23 +18,47 @@
   <nav class="navbar" id="main-nav">
     <div class="container nav-container">
       <a href="#" class="brand-logo" id="nav-brand-logo" onclick="switchView('landing')">
-        <div class="logo-badge">🛡️</div>
-        <span>PolicyPilot<span style="color: var(--cyan)">.ai</span></span>
+        <div class="brand-logo-mark">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 6V12C3 17.5 6.8 22.3 12 24C17.2 22.3 21 17.5 21 12V6L12 2Z" fill="url(#nav-shield-grad)"/>
+            <path d="M9.5 12L11.2 13.7L15 9.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="nav-shield-grad" x1="3" y1="2" x2="21" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6366F1"/>
+                <stop offset="1" stop-color="#06B6D4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="brand-text">PolicyPilot<span class="brand-badge-pill">AI</span></span>
       </a>
 
       <!-- Guest Links (Landing Page) -->
       <ul class="nav-links" id="nav-guest-links">
-        <li><a href="#demo" id="nav-link-demo">Live Demo</a></li>
+        <li><a href="#demo" id="nav-link-demo">Live Sandbox</a></li>
         <li><a href="#calculator" id="nav-link-calc">ROI Calculator</a></li>
-        <li><a href="#features" id="nav-link-features">Why It Works</a></li>
-        <li><a href="#pricing" id="nav-link-pricing">Pricing (UPI / Cards)</a></li>
+        <li><a href="#features" id="nav-link-features">Architecture</a></li>
+        <li><a href="#pricing" id="nav-link-pricing">Pricing</a></li>
         <li><a href="#faq" id="nav-link-faq">FAQ</a></li>
       </ul>
 
       <!-- Guest Actions -->
       <div class="nav-actions" id="nav-guest-actions">
+        <!-- Global Currency / Region Switcher -->
+        <div class="currency-toggle-wrapper nav-currency-pill">
+          <button type="button" class="currency-toggle-btn active" id="btn-nav-curr-inr" onclick="setCurrency('INR')">
+            <span>🇮🇳</span> ₹ INR
+          </button>
+          <button type="button" class="currency-toggle-btn" id="btn-nav-curr-usd" onclick="setCurrency('USD')">
+            <span>🌍</span> $ USD
+          </button>
+        </div>
+
         <button class="btn btn-secondary btn-sm" id="nav-btn-login" onclick="openLoginModal()">Sign In</button>
-        <button class="btn btn-primary btn-sm" id="nav-btn-cta" onclick="openPilotModal('Header CTA')">Start Free Pilot</button>
+        <button class="btn btn-primary btn-sm" id="nav-btn-cta" onclick="openPilotModal('Header CTA')">
+          <span>Start Free Pilot</span>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
 
       <!-- Logged-in Merchant Actions (Dashboard Mode) -->
@@ -52,8 +79,9 @@
     <header class="hero" id="hero-section">
       <div class="container">
         <div class="pill-tag" id="hero-pill-badge">
-          <span class="pulse-dot"></span>
-          Built for Shopify, WooCommerce & D2C Brands (India & Global)
+          <span class="pulse-beacon"></span>
+          <span>Zero-Hallucination AI Copilot for Shopify & D2C Brands</span>
+          <span style="opacity: 0.6; margin-left: 4px;">→</span>
         </div>
         
         <h1 class="hero-title" id="hero-main-title">
@@ -61,15 +89,17 @@
         </h1>
         
         <p class="hero-subtitle" id="hero-main-desc">
-          Raw ChatGPT makes up fake return promises. PolicyPilot reads your store's exact policies, answers customer questions 24/7 with direct citations, and routes edge cases to your team.
+          Generic AI chatbots make up false return guarantees. PolicyPilot grounds every single answer in your store's verified policy documents with line-by-line citations and human fallback.
         </p>
         
         <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
           <a href="#demo" class="btn btn-primary btn-lg" id="hero-btn-test-demo">
-            ⚡ Try Interactive Demo Below
+            <span>Explore Live Sandbox</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
           <button class="btn btn-secondary btn-lg" id="hero-btn-claim-pilot" onclick="openPilotModal('Hero Main')">
-            🚀 Get 14-Day Free Pilot (50 Free Tickets)
+            <span>Start 14-Day Free Pilot</span>
+            <span class="btn-sub-pill">50 Free Tickets</span>
           </button>
         </div>
 
@@ -78,14 +108,17 @@
             <div class="stat-number gradient">0.0%</div>
             <div class="stat-label">Hallucination Rate (Citation-Guarded)</div>
           </div>
+          <div class="stat-divider"></div>
           <div class="stat-item">
             <div class="stat-number">74%</div>
             <div class="stat-label">Average Ticket Deflection</div>
           </div>
+          <div class="stat-divider"></div>
           <div class="stat-item">
             <div class="stat-number gradient">&lt; 1.5s</div>
-            <div class="stat-label">Instant Customer Resolution</div>
+            <div class="stat-label">Instant Resolution Latency</div>
           </div>
+          <div class="stat-divider"></div>
           <div class="stat-item">
             <div class="stat-number" id="hero-savings-stat">₹2.4 Lakhs+</div>
             <div class="stat-label">Average Monthly Support Savings</div>
@@ -100,124 +133,147 @@
         <div class="container">
           <div class="section-header">
             <div class="pill-tag" style="background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.3); color: #67e8f9;">
-              Interactive Live Sandbox
+              Interactive RAG Sandbox
             </div>
-            <h2 class="section-title">Test PolicyPilot With Real Store Scenarios</h2>
+            <h2 class="section-title">Test PolicyPilot With Real Store Policies</h2>
             <p class="section-desc">
-              Select a store profile or paste your own policies. Ask any tricky return, shipping, or warranty question and see the verified citations in real time.
+              Select a store profile or paste your own live policy URL. Ask any tricky return, sizing, shipping, or warranty question and verify the instant citations.
             </p>
           </div>
 
           <div class="demo-wrapper" id="live-demo-card">
-            <!-- Sidebar: Store Selection & Policies -->
-            <div class="demo-sidebar">
-              <div class="sidebar-title">
-                <span>Select Merchant Profile</span>
-                <span style="font-size: 0.7rem; color: var(--emerald); font-weight: 600;">ACTIVE</span>
+            <!-- macOS Window Header Frame -->
+            <div class="window-chrome">
+              <div class="window-dots">
+                <span class="dot dot-close"></span>
+                <span class="dot dot-minimize"></span>
+                <span class="dot dot-expand"></span>
               </div>
-
-              <div class="store-tabs" id="store-selector-group">
-                <button class="store-tab-btn active" id="tab-aerokicks" onclick="switchStore('aerokicks')">
-                  <span class="store-tab-icon">👟</span>
-                  <div>
-                    <div class="store-tab-name">AeroKicks Apparel</div>
-                    <div class="store-tab-meta">Sneakers & Streetwear • 30-Day Policy</div>
-                  </div>
-                </button>
-
-                <button class="store-tab-btn" id="tab-zariboutique" onclick="switchStore('zariboutique')">
-                  <span class="store-tab-icon">👗</span>
-                  <div>
-                    <div class="store-tab-name">Zari Ethnic Wear (India)</div>
-                    <div class="store-tab-meta">Sarees & Kurtis • 7-Day Exchange</div>
-                  </div>
-                </button>
-
-                <button class="store-tab-btn" id="tab-glowbotanics" onclick="switchStore('glowbotanics')">
-                  <span class="store-tab-icon">🌿</span>
-                  <div>
-                    <div class="store-tab-name">GlowBotanics</div>
-                    <div class="store-tab-meta">Organic Skincare • 14-Day Open Box</div>
-                  </div>
-                </button>
-
-                <button class="store-tab-btn" id="tab-pulsetech" onclick="switchStore('pulsetech')">
-                  <span class="store-tab-icon">⚡</span>
-                  <div>
-                    <div class="store-tab-name">PulseTech Gear</div>
-                    <div class="store-tab-meta">Audio & Gadgets • 1-Year Warranty</div>
-                  </div>
-                </button>
-
-                <button class="store-tab-btn" id="tab-custom" onclick="switchStore('custom')">
-                  <span class="store-tab-icon">✨</span>
-                  <div>
-                    <div class="store-tab-name">Your Store (1-Click URL)</div>
-                    <div class="store-tab-meta">Paste policy link or text</div>
-                  </div>
-                </button>
+              <div class="window-address-bar">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>https://<strong id="window-store-domain">aerokicks.myshopify.com</strong>/policies/copilot</span>
               </div>
-
-              <!-- Policy Preview Box -->
-              <div class="policy-box">
-                <div class="policy-box-header">
-                  <span id="active-policy-title">AEROKICKS STORE POLICY</span>
-                  <span style="color: var(--cyan); font-size: 0.72rem;">INDEXED IN VECTOR DB</span>
-                </div>
-                <div class="policy-snippet" id="active-policy-text">
-                  [Section 3.1: Returns]
-                  Items in new, unworn condition with tags attached and original box may be returned within 30 days of delivery.
-                  Shoes with dirt, scuffs, or street wear are NOT eligible for refund.
-                  Domestic return label fee: $7.00 deducted from refund.
-                  Final sale items (ending in .99) cannot be returned or exchanged.
-                </div>
-              </div>
-
-              <!-- Custom Policy Input with 1-Click URL Importer -->
-              <div class="custom-input-group" id="custom-policy-inputs" style="display: none;">
-                <label class="custom-input-label">1-Click Policy Scraper / Text Input:</label>
-                <div style="display: flex; gap: 6px;">
-                  <input type="text" id="custom-policy-url" class="custom-input" placeholder="https://yourstore.com/policies/refund-policy" style="flex: 1;">
-                  <button class="btn btn-secondary btn-sm" onclick="scrapeStorePolicyUrl()" style="white-space: nowrap;">⚡ Import URL</button>
-                </div>
-                <textarea id="custom-policy-textarea" class="custom-input" rows="2" placeholder="Or paste return policy rules here..."></textarea>
-                <button class="btn btn-primary btn-sm" id="btn-save-custom-policy" onclick="applyCustomPolicy()">Index Into AI Memory</button>
+              <div class="window-meta-tag">
+                <span class="meta-pulse"></span>
+                <span>Zero-Hallucination Active • 12ms</span>
               </div>
             </div>
 
-            <!-- Chat Simulator -->
-            <div class="demo-chat">
-              <div class="chat-header">
-                <div class="agent-profile">
-                  <div class="agent-avatar" id="chat-agent-avatar">👟</div>
-                  <div class="agent-info">
-                    <h4 id="chat-agent-name">
-                      AeroKicks Support Assistant
-                      <span class="trust-shield">🛡️ Citation Guarded</span>
-                    </h4>
-                    <div class="agent-status-text" id="chat-agent-subtext">Powered by PolicyPilot Engine • Real-time RAG</div>
+            <!-- Workspace Body: Split Sidebar & Chat Simulator -->
+            <div class="demo-workspace">
+              <!-- Sidebar: Store Selection & Policies -->
+              <div class="demo-sidebar">
+                <div class="sidebar-title">
+                  <span>Merchant Policy Profile</span>
+                  <span style="font-size: 0.7rem; color: var(--emerald); font-weight: 600;">ACTIVE</span>
+                </div>
+
+                <div class="store-tabs" id="store-selector-group">
+                  <button class="store-tab-btn active" id="tab-aerokicks" onclick="switchStore('aerokicks')">
+                    <span class="store-monogram mono-ak">AK</span>
+                    <div>
+                      <div class="store-tab-name">AeroKicks Apparel</div>
+                      <div class="store-tab-meta">Sneakers & Streetwear • 30-Day Policy</div>
+                    </div>
+                  </button>
+
+                  <button class="store-tab-btn" id="tab-zariboutique" onclick="switchStore('zariboutique')">
+                    <span class="store-monogram mono-zb">ZB</span>
+                    <div>
+                      <div class="store-tab-name">Zari Ethnic Wear (India)</div>
+                      <div class="store-tab-meta">Sarees & Kurtis • 7-Day Exchange</div>
+                    </div>
+                  </button>
+
+                  <button class="store-tab-btn" id="tab-glowbotanics" onclick="switchStore('glowbotanics')">
+                    <span class="store-monogram mono-gb">GB</span>
+                    <div>
+                      <div class="store-tab-name">GlowBotanics Skincare</div>
+                      <div class="store-tab-meta">Organic Beauty • 14-Day Open Box</div>
+                    </div>
+                  </button>
+
+                  <button class="store-tab-btn" id="tab-pulsetech" onclick="switchStore('pulsetech')">
+                    <span class="store-monogram mono-pt">PT</span>
+                    <div>
+                      <div class="store-tab-name">PulseTech Audio</div>
+                      <div class="store-tab-meta">Audio & Gadgets • 1-Year Warranty</div>
+                    </div>
+                  </button>
+
+                  <button class="store-tab-btn" id="tab-custom" onclick="switchStore('custom')">
+                    <span class="store-monogram mono-custom">+</span>
+                    <div>
+                      <div class="store-tab-name">Your Store (1-Click URL)</div>
+                      <div class="store-tab-meta">Paste store link or custom rules</div>
+                    </div>
+                  </button>
+                </div>
+
+                <!-- Policy Preview Box -->
+                <div class="policy-box">
+                  <div class="policy-box-header">
+                    <span id="active-policy-title">AEROKICKS STORE POLICY</span>
+                    <span style="color: var(--cyan); font-size: 0.72rem; font-weight: 600;">INDEXED IN VECTOR DB</span>
+                  </div>
+                  <div class="policy-snippet" id="active-policy-text">
+                    [Section 3.1: Returns]
+                    Items in new, unworn condition with tags attached and original box may be returned within 30 days of delivery.
+                    Shoes with dirt, scuffs, or street wear are NOT eligible for refund.
+                    Domestic return label fee: $7.00 deducted from refund.
+                    Final sale items (ending in .99) cannot be returned or exchanged.
                   </div>
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="resetChat()" id="btn-clear-chat" title="Clear conversation">
-                  🔄 Clear
-                </button>
-              </div>
 
-              <div class="chat-messages" id="chat-messages-container">
-                <div class="message agent">
-                  <div class="msg-bubble">
-                    Hello! I'm your automated store support assistant. Ask me anything about our return windows, sizing, shipping rates, or exchange policies!
+                <!-- Custom Policy Input with 1-Click URL Importer -->
+                <div class="custom-input-group" id="custom-policy-inputs" style="display: none;">
+                  <label class="custom-input-label">1-Click Policy Scraper / Text Input:</label>
+                  <div style="display: flex; gap: 6px;">
+                    <input type="text" id="custom-policy-url" class="custom-input" placeholder="https://yourstore.com/policies/refund-policy" style="flex: 1;">
+                    <button class="btn btn-secondary btn-sm" onclick="scrapeStorePolicyUrl()" style="white-space: nowrap;">⚡ Import URL</button>
                   </div>
+                  <textarea id="custom-policy-textarea" class="custom-input" rows="2" placeholder="Or paste return policy rules here..."></textarea>
+                  <button class="btn btn-primary btn-sm" id="btn-save-custom-policy" onclick="applyCustomPolicy()">Index Into AI Memory</button>
                 </div>
               </div>
 
-              <div class="suggestion-chips" id="suggestion-chips-container"></div>
+              <!-- Chat Simulator -->
+              <div class="demo-chat">
+                <div class="chat-header">
+                  <div class="agent-profile">
+                    <div class="agent-avatar-ai" id="chat-agent-avatar">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L3 6V12C3 17.5 6.8 22.3 12 24C17.2 22.3 21 17.5 21 12V6L12 2Z"/></svg>
+                    </div>
+                    <div class="agent-info">
+                      <h4 id="chat-agent-name">
+                        AeroKicks Support Assistant
+                        <span class="trust-shield">✓ Citation Guarded</span>
+                      </h4>
+                      <div class="agent-status-text" id="chat-agent-subtext">Powered by PolicyPilot Engine • Real-time RAG</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="resetChat()" id="btn-clear-chat" title="Clear conversation">
+                    <span>Clear Thread</span>
+                  </button>
+                </div>
 
-              <div class="chat-input-bar">
-                <input type="text" id="chat-user-input" placeholder="Type a customer question (e.g. 'Can I return shoes if I wore them outside?')..." onkeydown="handleInputKey(event)">
-                <button class="btn btn-primary" id="btn-send-chat" onclick="sendUserMessage()">
-                  <span>Ask AI</span> ➔
-                </button>
+                <div class="chat-messages" id="chat-messages-container">
+                  <div class="message agent">
+                    <div class="msg-bubble">
+                      Hello! I'm your automated store support assistant. Ask me anything about our return windows, sizing, shipping rates, or exchange policies!
+                    </div>
+                  </div>
+                </div>
+
+                <div class="suggestion-chips" id="suggestion-chips-container"></div>
+
+                <div class="chat-input-bar">
+                  <input type="text" id="chat-user-input" placeholder="Type a customer question (e.g. 'Can I return shoes if I wore them outside?')..." onkeydown="handleInputKey(event)">
+                  <button class="btn btn-primary" id="btn-send-chat" onclick="sendUserMessage()">
+                    <span>Query AI</span>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -288,56 +344,85 @@
             </div>
             <h2 class="section-title">Why PolicyPilot Outperforms Generic Chatbots</h2>
             <p class="section-desc">
-              Standard ChatGPT bots hallucinate fake return promises and confuse exchange rules. PolicyPilot is built with strict policy critic guards to safeguard your store's margins and reputation.
+              Standard ChatGPT models make up false return guarantees and confuse exchange windows. PolicyPilot's dual-engine critic strictly audits every response against your exact policy clauses.
             </p>
           </div>
 
           <div class="features-grid">
             <div class="feature-card">
-              <div class="feature-icon-box">🛡️</div>
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+              </div>
+              <div class="feature-card-micro-tag">CORE GUARD</div>
               <h3>Dual-Engine Critic Guard</h3>
               <p>
-                Every drafted response is verified by an internal Critic AI against your indexed return and warranty clauses. If an answer cannot be cited with 100% confidence, PolicyPilot never bluffs—it routes the shopper to your team.
+                Every generated response passes through an internal Critic model that verifies direct citations. If an answer cannot be grounded in your indexed text with 100% confidence, it never bluffs—it politely escalates to humans.
               </p>
+              <div class="feature-diff-pill">
+                <span class="diff-bad">ChatGPT: Fake Promise ✗</span>
+                <span class="diff-good">PolicyPilot: Cited §3.1 ✓</span>
+              </div>
             </div>
 
             <div class="feature-card">
-              <div class="feature-icon-box">⚡</div>
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </div>
+              <div class="feature-card-micro-tag">AUTOMATED SYNC</div>
               <h3>1-Click Store Policy Scraper</h3>
               <p>
-                Simply paste your store's return URL or policy page. Our crawler extracts clauses, structures FAQs, and updates vector embeddings in under 30 seconds.
+                Simply paste your store's return URL. Our scraper crawls the page, parses complex legal clauses, structures them into Q&A vectors, and updates AI memory in under 30 seconds.
               </p>
+              <div class="feature-code-pill">
+                <code>&gt; GET /policies/returns → 42 rules indexed (1.4s)</code>
+              </div>
             </div>
 
             <div class="feature-card">
-              <div class="feature-icon-box">🇮🇳</div>
-              <h3>India D2C & UPI Ready</h3>
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+              </div>
+              <div class="feature-card-micro-tag">GLOBAL & INDIA D2C</div>
+              <h3>UPI & Global Stripe Cross-Border</h3>
               <p>
-                Built natively for Indian e-commerce: reverse pickup fee calculation, 19,000+ pincode logistics awareness (Shiprocket/BlueDart), instant UPI QR payments, and GST-compliant tax invoices.
+                Engineered for both domestic and global commerce: instant UPI QR & IMPS settlement for Indian merchants, plus seamless $ USD Stripe credit card and Apple Pay billing for US & international stores.
               </p>
+              <div class="feature-diff-pill">
+                <span style="color:#6ee7b7;">⚡ UPI / QR (India)</span>
+                <span style="color:#93c5fd;">💳 Stripe $ USD (Global)</span>
+              </div>
             </div>
 
             <div class="feature-card">
-              <div class="feature-icon-box">📱</div>
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              </div>
+              <div class="feature-card-micro-tag">HUMAN ESCALATION</div>
               <h3>Seamless WhatsApp Fallback</h3>
               <p>
-                When a complex inquiry arises or a customer requests human help, PolicyPilot transfers the chat directly to your store's WhatsApp support line with full context, avoiding repeat questions.
+                When an edge case arises or a customer requests human assistance, PolicyPilot transfers the chat to your store's WhatsApp support line with the conversation history prefilled.
               </p>
             </div>
 
             <div class="feature-card">
-              <div class="feature-icon-box">🛍️</div>
-              <h3>60-Second Shopify Theme Embed</h3>
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              </div>
+              <div class="feature-card-micro-tag">SHOPIFY READY</div>
+              <h3>60-Second Theme Embed</h3>
               <p>
-                No complicated backend deployment. Copy a single line of script into your Shopify <code>theme.liquid</code> file, customize the colors to match your brand, and go live immediately.
+                Zero complex server setup. Add one lightweight script tag into your Shopify <code>theme.liquid</code>, customize your widget colors, and offer instant 24/7 policy support.
               </p>
             </div>
 
             <div class="feature-card">
-              <div class="feature-icon-box">🔒</div>
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="feature-card-micro-tag">ENTERPRISE SECURITY</div>
               <h3>Tenant Isolation & Privacy</h3>
               <p>
-                Your store policies and customer conversations are strictly isolated with row-level encryption. Your proprietary data is never used to train public models.
+                Every merchant's data is partitioned with row-level encryption. Your customer queries and proprietary business policies are strictly protected and never used to train public LLMs.
               </p>
             </div>
           </div>
@@ -349,70 +434,90 @@
         <div class="container">
           <div class="section-header">
             <div class="pill-tag">Simple, Usage-Aligned Pricing</div>
-            <h2 class="section-title">Invest in Savings, Not Extra Headcount</h2>
+            <h2 class="section-title">Invest in Support Deflection, Not Extra Headcount</h2>
             <p class="section-desc">
-              All plans include a 14-day risk-free trial. Pay via UPI, GPay, PhonePe, Paytm, or Credit Card.
+              All plans include a 14-day risk-free trial. Choose your currency below:
             </p>
 
-            <!-- Currency Toggle -->
+            <!-- Currency & Region Selector -->
             <div style="margin-top: 24px;">
               <div class="currency-toggle-wrapper">
-                <button class="currency-toggle-btn active" id="btn-curr-inr" onclick="setCurrency('INR')">
-                  🇮🇳 ₹ INR (UPI & QR)
+                <button type="button" class="currency-toggle-btn active" id="btn-curr-inr" onclick="setCurrency('INR')">
+                  <span>🇮🇳</span> ₹ INR (UPI QR & IMPS)
                 </button>
-                <button class="currency-toggle-btn" id="btn-curr-usd" onclick="setCurrency('USD')">
-                  🌐 $ USD (Cards & Stripe)
+                <button type="button" class="currency-toggle-btn" id="btn-curr-usd" onclick="setCurrency('USD')">
+                  <span>🌍</span> $ USD (Cards, Apple Pay & Stripe)
                 </button>
+              </div>
+
+              <!-- International Notice Pill -->
+              <div class="pricing-region-banner" id="pricing-region-banner">
+                <span class="region-info-dot"></span>
+                <span id="pricing-region-note-text">
+                  <strong>India D2C Mode:</strong> Instant UPI QR code, GPay/PhonePe intent, IMPS bank transfer & GST input tax receipt.
+                </span>
               </div>
             </div>
           </div>
 
           <div class="pricing-grid">
             <div class="pricing-card" id="pricing-starter">
-              <div class="plan-name">Starter Pilot</div>
-              <div class="plan-desc">For growing boutiques and emerging D2C brands.</div>
+              <div class="plan-header-row">
+                <div class="plan-name">Starter Pilot</div>
+              </div>
+              <div class="plan-desc">For emerging boutiques and scaling D2C brands.</div>
               <div class="plan-price" id="price-starter">₹4,999 <span>/ month</span></div>
               <ul class="plan-features">
-                <li><span>✓</span> Up to 1,000 automated answers</li>
-                <li><span>✓</span> Guaranteed 0% hallucination guard</li>
-                <li><span>✓</span> Full policy citations</li>
-                <li><span>✓</span> Standard web & Shopify widget</li>
-                <li><span>✓</span> GST Invoicing supported</li>
+                <li><span class="check-icon">✓</span> Up to 1,000 automated answers</li>
+                <li><span class="check-icon">✓</span> Guaranteed 0% hallucination guard</li>
+                <li><span class="check-icon">✓</span> Full line-by-line policy citations</li>
+                <li><span class="check-icon">✓</span> Standard web & Shopify widget</li>
+                <li><span class="check-icon">✓</span> Official Tax Invoicing included</li>
               </ul>
-              <button class="btn btn-secondary" id="btn-pay-starter" onclick="openPaymentModal('Starter Plan', 4999, 79, 1000)">
-                ⚡ Pay with UPI / QR Code
+              <button class="btn btn-secondary" id="btn-pay-starter" onclick="openPaymentModal('Starter Plan', 4999, 79, 1000)" style="width: 100%;">
+                <span id="btn-pay-starter-label">⚡ Subscribe via UPI / Card</span>
               </button>
             </div>
 
+            <!-- Featured / Growth Card with Animated Border Beam -->
             <div class="pricing-card featured" id="pricing-growth">
-              <div class="popular-badge">Most Popular</div>
-              <div class="plan-name">Growth Store</div>
-              <div class="plan-desc">For high-volume brands ready to automate repetitive tickets.</div>
+              <div class="popular-badge">
+                <span class="popular-star">★</span> MOST POPULAR • 14-DAY FREE PILOT
+              </div>
+              <div class="plan-header-row">
+                <div class="plan-name">Growth Store</div>
+              </div>
+              <div class="plan-desc">For high-volume brands ready to automate 70%+ of customer tickets.</div>
               <div class="plan-price" id="price-growth">₹14,999 <span>/ month</span></div>
               <ul class="plan-features">
-                <li><span>✓</span> Up to 4,000 automated answers</li>
-                <li><span>✓</span> Human-in-the-loop escalation routing</li>
-                <li><span>✓</span> WhatsApp support fallback</li>
-                <li><span>✓</span> Custom brand voice & color theming</li>
-                <li><span>✓</span> Priority WhatsApp support</li>
+                <li><span class="check-icon">✓</span> Up to 4,000 automated answers</li>
+                <li><span class="check-icon">✓</span> Human-in-the-loop escalation routing</li>
+                <li><span class="check-icon">✓</span> WhatsApp human handoff channel</li>
+                <li><span class="check-icon">✓</span> Custom brand voice & color theming</li>
+                <li><span class="check-icon">✓</span> Priority support & onboarding</li>
               </ul>
-              <button class="btn btn-primary" id="btn-pay-growth" onclick="openPaymentModal('Growth Store', 14999, 199, 4000)">
-                ⚡ Pay with UPI / QR Code
+              <button class="btn btn-primary" id="btn-pay-growth" onclick="openPaymentModal('Growth Store', 14999, 199, 4000)" style="width: 100%;">
+                <span id="btn-pay-growth-label">⚡ Subscribe via UPI / Card</span>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
 
             <div class="pricing-card" id="pricing-scale">
-              <div class="plan-name">Omnichannel Scale</div>
+              <div class="plan-header-row">
+                <div class="plan-name">Omnichannel Scale</div>
+              </div>
               <div class="plan-desc">For established retail operations & multi-store setups.</div>
               <div class="plan-price" id="price-scale">₹39,999 <span>/ month</span></div>
               <ul class="plan-features">
-                <li><span>✓</span> Up to 15,000 automated answers</li>
-                <li><span>✓</span> Multiple storefront domains</li>
-                <li><span>✓</span> Gorgias, Shiprocket & Klaviyo hooks</li>
-                <li><span>✓</span> Dedicated account onboarding engineer</li>
-                <li><span>✓</span> 99.9% uptime SLA</li>
+                <li><span class="check-icon">✓</span> Up to 15,000 automated answers</li>
+                <li><span class="check-icon">✓</span> Multiple storefront domains</li>
+                <li><span class="check-icon">✓</span> Gorgias, Shiprocket & Klaviyo webhooks</li>
+                <li><span class="check-icon">✓</span> Dedicated account onboarding engineer</li>
+                <li><span class="check-icon">✓</span> 99.9% uptime SLA</li>
               </ul>
-              <button class="btn btn-secondary" onclick="openContactModal('Omnichannel Scale Plan')">Talk to Founder</button>
+              <button class="btn btn-secondary" onclick="openContactModal('Omnichannel Scale Plan')" style="width: 100%;">
+                <span>Contact Enterprise Team</span>
+              </button>
             </div>
           </div>
         </div>
@@ -424,17 +529,27 @@
           <div class="section-header">
             <div class="pill-tag">Frequently Asked Questions</div>
             <h2 class="section-title">Everything You Need to Know</h2>
-            <p class="section-desc">Got questions about integrations, UPI, security, or guarantees? We've got answers.</p>
+            <p class="section-desc">Got questions about cross-border payments, UPI, security, or guarantees? We've got answers.</p>
           </div>
 
           <div class="faq-container">
             <div class="faq-item open" onclick="toggleFaq(this)">
               <div class="faq-question">
-                <span>Can I pay using UPI, Google Pay, PhonePe, or Paytm?</span>
+                <span>How do users outside India pay? Can international stores pay in USD?</span>
                 <span class="faq-chevron">▼</span>
               </div>
               <div class="faq-answer">
-                Yes! We support all Indian payment methods including instant UPI QR code scanning, Google Pay, PhonePe, Paytm, BHIM, CRED, NetBanking, and Indian business credit/debit cards. You also receive a GST-compliant invoice for input tax credit.
+                Yes! If you or your customers are outside India, simply toggle to <strong>$ USD</strong> on the pricing table or checkout modal. We process international payments via <strong>Stripe</strong> in USD with zero currency conversion penalty for the buyer. We accept all major international cards (Visa, Mastercard, American Express, Discover), Apple Pay, and Google Pay across 135+ countries.
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span>Can Indian merchants pay using UPI, Google Pay, PhonePe, or IMPS?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Yes! We support all Indian payment methods including instant UPI QR code scanning, Google Pay, PhonePe, Paytm, BHIM, CRED, IMPS direct bank transfer, and Indian corporate credit/debit cards. You also receive an automatic GST-compliant invoice for 18% input tax credit.
               </div>
             </div>
 

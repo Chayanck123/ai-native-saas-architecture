@@ -1371,6 +1371,66 @@ function updatePaymentModalDetails() {
   if (nameDisplay) nameDisplay.textContent = receiver.bankName;
 }
 
+// Global Currency & Region Switcher Controller (INR ₹ vs USD $)
+function setCurrency(curr) {
+  currentCurrency = curr;
+
+  // 1. Sync Navigation Switcher Buttons
+  const navInr = document.getElementById("btn-nav-curr-inr");
+  const navUsd = document.getElementById("btn-nav-curr-usd");
+  if (navInr) navInr.classList.toggle("active", curr === "INR");
+  if (navUsd) navUsd.classList.toggle("active", curr === "USD");
+
+  // 2. Sync Pricing Section Switcher Buttons
+  const priceInr = document.getElementById("btn-curr-inr");
+  const priceUsd = document.getElementById("btn-curr-usd");
+  if (priceInr) priceInr.classList.toggle("active", curr === "INR");
+  if (priceUsd) priceUsd.classList.toggle("active", curr === "USD");
+
+  // 3. Update Pricing Display Figures
+  const pStarter = document.getElementById("price-starter");
+  const pGrowth = document.getElementById("price-growth");
+  const pScale = document.getElementById("price-scale");
+  const bStarterLabel = document.getElementById("btn-pay-starter-label");
+  const bGrowthLabel = document.getElementById("btn-pay-growth-label");
+  const regionNote = document.getElementById("pricing-region-note-text");
+
+  if (curr === "INR") {
+    if (pStarter) pStarter.innerHTML = `₹4,999 <span>/ month</span>`;
+    if (pGrowth) pGrowth.innerHTML = `₹14,999 <span>/ month</span>`;
+    if (pScale) pScale.innerHTML = `₹39,999 <span>/ month</span>`;
+
+    if (bStarterLabel) bStarterLabel.textContent = "⚡ Subscribe via UPI / QR Code";
+    if (bGrowthLabel) bGrowthLabel.textContent = "⚡ Subscribe via UPI / QR Code";
+
+    if (regionNote) {
+      regionNote.innerHTML = `<strong>India D2C Mode:</strong> Instant UPI QR code, GPay/PhonePe intent, IMPS bank transfer & GST input tax receipt.`;
+    }
+  } else {
+    if (pStarter) pStarter.innerHTML = `$59 <span>/ month</span>`;
+    if (pGrowth) pGrowth.innerHTML = `$179 <span>/ month</span>`;
+    if (pScale) pScale.innerHTML = `$499 <span>/ month</span>`;
+
+    if (bStarterLabel) bStarterLabel.textContent = "💳 Subscribe via Card / Apple Pay";
+    if (bGrowthLabel) bGrowthLabel.textContent = "💳 Subscribe via Card / Apple Pay";
+
+    if (regionNote) {
+      regionNote.innerHTML = `<strong>Global SaaS Mode:</strong> International Cards (Visa, Mastercard, Amex), Apple Pay & Google Pay via Stripe. Auto-settled to INR via RBI e-FIRC.`;
+    }
+  }
+
+  // 4. If payment modal is currently visible, refresh amounts and active tab
+  const modal = document.getElementById("payment-modal");
+  if (modal && modal.style.display === "flex") {
+    updatePaymentModalDetails();
+    if (curr === "INR") {
+      switchPaymentMethod("upi");
+    } else {
+      switchPaymentMethod("card");
+    }
+  }
+}
+
 // Payment Modal Controller (UPI + Bank Transfer + Stripe)
 function openPaymentModal(planName, inrPrice, usdPrice, credits) {
   pendingPlan = { name: planName, inr: inrPrice, usd: usdPrice, credits: credits };
