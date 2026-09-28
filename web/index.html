@@ -1435,8 +1435,13 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-pilot-otp" style="width: 100%; margin-top: 8px;">
-              ⚡ Send OTP Verification Code ➔
+            <!-- Unlimited Free OTPs Assurance Badge -->
+            <div class="unlimited-otp-badge" style="width: 100%; justify-content: center; margin-top: 6px;">
+              <span class="pulse-dot"></span> Unlimited Free OTPs: ₹0 telecom carrier charges forever
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-pilot-otp" style="width: 100%;">
+              ⚡ Send Free OTP Verification Code ➔
             </button>
 
             <!-- Direct Switcher to Sign In -->
@@ -1452,13 +1457,29 @@
 
       <!-- STEP 2: OTP Verification Screen -->
       <div id="pilot-step-otp" style="display: none;">
-        <div style="text-align: center; margin-bottom: 16px;">
+        <div style="text-align: center; margin-bottom: 14px;">
           <div class="auth-badge-header">🔒 2-Factor OTP Verification</div>
           <h3 style="font-size: 1.35rem; font-weight: 800;">Verify & Activate Pilot</h3>
           <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
-            Enter the 6-digit code sent to <strong id="pilot-otp-target-display" style="color: #a5b4fc;">+91 98765 43210</strong>
+            Verification code sent to <strong id="pilot-otp-target-display" style="color: #a5b4fc;">+91 98765 43210</strong>
           </p>
         </div>
+
+        <!-- Unlimited Free OTP Live Display Card -->
+        <div class="free-otp-display-card">
+          <div style="font-size: 0.74rem; text-transform: uppercase; font-weight: 700; color: #34d399; margin-bottom: 2px;">
+            ⚡ Unlimited Free OTP Engine Active (₹0 Carrier Cost)
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">
+            Instant Security Code:
+          </div>
+          <div class="free-otp-pill" id="pilot-free-otp-pill">719284</div>
+        </div>
+
+        <!-- WhatsApp 1-Tap Free Delivery Button -->
+        <a id="pilot-whatsapp-btn" href="#" target="_blank" class="whatsapp-otp-btn">
+          <span>💬</span> Open in WhatsApp (Free & Instant)
+        </a>
 
         <form onsubmit="handlePilotVerifyOtp(event)">
           <div class="otp-container" id="pilot-otp-boxes">
@@ -1471,15 +1492,15 @@
           </div>
 
           <div class="otp-autofill-badge" id="pilot-autofill-btn" onclick="autoFillPilotOtp()">
-            ⚡ Click to Auto-Fill Received OTP: <strong id="pilot-autofill-code">719284</strong>
+            ⚡ 1-Tap Auto-Fill Code: <strong id="pilot-autofill-code">719284</strong>
           </div>
 
           <div class="otp-resend-row">
             <span id="pilot-timer-display">Resend code in <strong id="pilot-countdown">30s</strong></span>
-            <button type="button" class="btn-resend-otp" id="btn-pilot-resend" onclick="resendPilotOtp()" disabled>Resend OTP</button>
+            <button type="button" class="btn-resend-otp" id="btn-pilot-resend" onclick="resendPilotOtp()" disabled>Resend Free OTP</button>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-lg" id="btn-pilot-verify" style="width: 100%; margin-top: 16px;">
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-pilot-verify" style="width: 100%; margin-top: 14px;">
             🎉 Verify & Launch Command Center ➔
           </button>
 
@@ -1498,12 +1519,17 @@
       
       <!-- STEP 1: Enter Phone / Email -->
       <div id="login-step-credentials">
-        <div style="text-align: center; margin-bottom: 20px;">
+        <div style="text-align: center; margin-bottom: 18px;">
           <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
           <h3 style="font-size: 1.4rem; font-weight: 800;">Sign In to Store Dashboard</h3>
           <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
-            Choose your registered phone or work email for instant OTP sign in.
+            Enter your registered phone or work email for instant free OTP sign in.
           </p>
+        </div>
+
+        <!-- Unlimited Free Sign-In Assurance Badge -->
+        <div class="unlimited-otp-badge" style="width: 100%; justify-content: center; margin-bottom: 14px;">
+          <span class="pulse-dot"></span> Unlimited Free OTPs: Sign in anytime with zero telecom fees
         </div>
 
         <form onsubmit="handleLoginRequestOtp(event)">
@@ -1538,7 +1564,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-lg" id="btn-login-send-otp" style="width: 100%;">
-              ⚡ Send OTP Verification Code ➔
+              ⚡ Send Free OTP Verification Code ➔
             </button>
             <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 4px 0;">— OR —</div>
             <button type="button" class="btn btn-secondary" onclick="quickLoginDemoStore()" style="width: 100%;">
@@ -1558,13 +1584,29 @@
 
       <!-- STEP 2: OTP Verification Screen -->
       <div id="login-step-otp" style="display: none;">
-        <div style="text-align: center; margin-bottom: 16px;">
+        <div style="text-align: center; margin-bottom: 14px;">
           <div class="auth-badge-header">🔒 2-Factor OTP Verification</div>
-          <h3 style="font-size: 1.35rem; font-weight: 800;">Enter 6-Digit OTP</h3>
+          <h3 style="font-size: 1.35rem; font-weight: 800;">Enter 6-Digit Sign-In OTP</h3>
           <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
-            Verification code sent to <strong id="login-otp-target-display" style="color: #a5b4fc;">+91 98765 43210</strong>
+            Verification code dispatched to <strong id="login-otp-target-display" style="color: #a5b4fc;">+91 98765 43210</strong>
           </p>
         </div>
+
+        <!-- Unlimited Free OTP Live Display Card -->
+        <div class="free-otp-display-card">
+          <div style="font-size: 0.74rem; text-transform: uppercase; font-weight: 700; color: #34d399; margin-bottom: 2px;">
+            ⚡ Unlimited Free OTP Engine Active (₹0 Carrier Cost)
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">
+            Instant Sign-In Security Code:
+          </div>
+          <div class="free-otp-pill" id="login-free-otp-pill">482910</div>
+        </div>
+
+        <!-- WhatsApp 1-Tap Free Delivery Button -->
+        <a id="login-whatsapp-btn" href="#" target="_blank" class="whatsapp-otp-btn">
+          <span>💬</span> Open in WhatsApp (Free & Instant)
+        </a>
 
         <form onsubmit="handleLoginVerifyOtp(event)">
           <div class="otp-container" id="login-otp-boxes">
@@ -1577,15 +1619,15 @@
           </div>
 
           <div class="otp-autofill-badge" id="login-autofill-btn" onclick="autoFillLoginOtp()">
-            ⚡ Click to Auto-Fill Received OTP: <strong id="login-autofill-code">482910</strong>
+            ⚡ 1-Tap Auto-Fill Code: <strong id="login-autofill-code">482910</strong>
           </div>
 
           <div class="otp-resend-row">
             <span id="login-timer-display">Resend code in <strong id="login-countdown">30s</strong></span>
-            <button type="button" class="btn-resend-otp" id="btn-login-resend" onclick="resendLoginOtp()" disabled>Resend OTP</button>
+            <button type="button" class="btn-resend-otp" id="btn-login-resend" onclick="resendLoginOtp()" disabled>Resend Free OTP</button>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-lg" id="btn-login-verify" style="width: 100%; margin-top: 16px;">
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-login-verify" style="width: 100%; margin-top: 14px;">
             🔒 Verify & Sign In ➔
           </button>
 

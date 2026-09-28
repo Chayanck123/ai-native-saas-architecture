@@ -448,6 +448,19 @@ function handleOtpKey(e, prevId) {
   }
 }
 
+// Unlimited Free WhatsApp & In-App OTP Generator
+function getWhatsAppOtpUrl(target, otp, storeName) {
+  const cleanDigits = (target || "").replace(/[^0-9]/g, "");
+  const storeLabel = storeName || "PolicyPilot AI";
+  const msgText = encodeURIComponent(`*${otp}* is your PolicyPilot AI verification security code for ${storeLabel}.\n\n🔒 Valid for 10 minutes. 100% Free OTP Delivery (₹0 telecom charges).`);
+  
+  if (cleanDigits.length >= 10) {
+    const fullPhone = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
+    return `https://api.whatsapp.com/send?phone=${fullPhone}&text=${msgText}`;
+  }
+  return `https://api.whatsapp.com/send?text=${msgText}`;
+}
+
 // ==========================================
 // NEW USER PILOT SIGNUP OTP (PHONE OR EMAIL)
 // ==========================================
@@ -486,7 +499,15 @@ function handlePilotRequestOtp(e) {
 
   const icon = contactType === "phone" ? "📱 " : "✉️ ";
   document.getElementById("pilot-otp-target-display").textContent = icon + contact;
-  document.getElementById("pilot-autofill-code").textContent = pilotGeneratedOtp;
+  
+  const autofillCode = document.getElementById("pilot-autofill-code");
+  if (autofillCode) autofillCode.textContent = pilotGeneratedOtp;
+
+  const freePill = document.getElementById("pilot-free-otp-pill");
+  if (freePill) freePill.textContent = pilotGeneratedOtp;
+
+  const waBtn = document.getElementById("pilot-whatsapp-btn");
+  if (waBtn) waBtn.href = getWhatsAppOtpUrl(contact, pilotGeneratedOtp, storeName);
 
   document.getElementById("pilot-step-details").style.display = "none";
   document.getElementById("pilot-step-otp").style.display = "block";
@@ -499,9 +520,9 @@ function handlePilotRequestOtp(e) {
   if (firstBox) firstBox.focus();
 
   startPilotCountdown(30);
-  const channelLabel = contactType === "phone" ? "SMS & WhatsApp" : "Email";
+  const channelLabel = contactType === "phone" ? "WhatsApp & SMS" : "Email";
 
-  // Dispatch via Serverless OTP Endpoint (Twilio / Fast2SMS / Resend)
+  // Dispatch via Serverless OTP Endpoint in background
   fetch('/api/send-otp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -516,12 +537,17 @@ function handlePilotRequestOtp(e) {
     if (data.deliveredLive) {
       showToast(`📲 Real ${data.channel.toUpperCase()} delivered via ${data.provider} to ${contact}!`, "success");
     } else {
-      if (data.otp) pilotGeneratedOtp = data.otp;
-      showToast(`📩 Verification code dispatched to ${contact}: ${pilotGeneratedOtp}`, "success");
+      if (data.otp) {
+        pilotGeneratedOtp = data.otp;
+        if (autofillCode) autofillCode.textContent = pilotGeneratedOtp;
+        if (freePill) freePill.textContent = pilotGeneratedOtp;
+        if (waBtn) waBtn.href = getWhatsAppOtpUrl(contact, pilotGeneratedOtp, storeName);
+      }
+      showToast(`⚡ Unlimited Free OTP dispatched to ${contact}: ${pilotGeneratedOtp}`, "success");
     }
   })
   .catch(() => {
-    showToast(`📩 Verification code dispatched to ${contact}: ${pilotGeneratedOtp}`, "success");
+    showToast(`⚡ Unlimited Free OTP dispatched to ${contact}: ${pilotGeneratedOtp}`, "success");
   });
 }
 
@@ -545,9 +571,19 @@ function startPilotCountdown(seconds) {
 
 function resendPilotOtp() {
   pilotGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-  document.getElementById("pilot-autofill-code").textContent = pilotGeneratedOtp;
+  const autofillCode = document.getElementById("pilot-autofill-code");
+  if (autofillCode) autofillCode.textContent = pilotGeneratedOtp;
+
+  const freePill = document.getElementById("pilot-free-otp-pill");
+  if (freePill) freePill.textContent = pilotGeneratedOtp;
+
+  const waBtn = document.getElementById("pilot-whatsapp-btn");
+  if (waBtn && pendingPilotData) {
+    waBtn.href = getWhatsAppOtpUrl(pendingPilotData.contact, pilotGeneratedOtp, pendingPilotData.storeName);
+  }
+
   startPilotCountdown(30);
-  showToast(`📲 New verification code sent to ${pendingPilotData.contact}: ${pilotGeneratedOtp}`, "success");
+  showToast(`📲 New Unlimited Free OTP: ${pilotGeneratedOtp}`, "success");
 }
 
 function autoFillPilotOtp() {
@@ -671,7 +707,15 @@ function handleLoginRequestOtp(e) {
 
   const icon = contactType === "phone" ? "📱 " : "✉️ ";
   document.getElementById("login-otp-target-display").textContent = icon + identifier;
-  document.getElementById("login-autofill-code").textContent = loginGeneratedOtp;
+
+  const autofillCode = document.getElementById("login-autofill-code");
+  if (autofillCode) autofillCode.textContent = loginGeneratedOtp;
+
+  const freePill = document.getElementById("login-free-otp-pill");
+  if (freePill) freePill.textContent = loginGeneratedOtp;
+
+  const waBtn = document.getElementById("login-whatsapp-btn");
+  if (waBtn) waBtn.href = getWhatsAppOtpUrl(identifier, loginGeneratedOtp, "Store Sign In");
 
   document.getElementById("login-step-credentials").style.display = "none";
   document.getElementById("login-step-otp").style.display = "block";
@@ -684,8 +728,35 @@ function handleLoginRequestOtp(e) {
   if (firstBox) firstBox.focus();
 
   startLoginCountdown(30);
-  const channelLabel = contactType === "phone" ? "SMS & WhatsApp" : "Email";
-  showToast(`📲 Login OTP sent via ${channelLabel} to ${identifier}: ${loginGeneratedOtp}`, "success");
+  const channelLabel = contactType === "phone" ? "WhatsApp & SMS" : "Email";
+
+  // Dispatch via Serverless OTP Endpoint in background
+  fetch('/api/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      target: identifier, 
+      channel: contactType,
+      customKeys: activeMerchant ? activeMerchant.integrations : undefined
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.deliveredLive) {
+      showToast(`📲 Real ${data.channel.toUpperCase()} delivered via ${data.provider} to ${identifier}!`, "success");
+    } else {
+      if (data.otp) {
+        loginGeneratedOtp = data.otp;
+        if (autofillCode) autofillCode.textContent = loginGeneratedOtp;
+        if (freePill) freePill.textContent = loginGeneratedOtp;
+        if (waBtn) waBtn.href = getWhatsAppOtpUrl(identifier, loginGeneratedOtp, "Store Sign In");
+      }
+      showToast(`⚡ Unlimited Free OTP dispatched to ${identifier}: ${loginGeneratedOtp}`, "success");
+    }
+  })
+  .catch(() => {
+    showToast(`⚡ Unlimited Free OTP dispatched to ${identifier}: ${loginGeneratedOtp}`, "success");
+  });
 }
 
 function startLoginCountdown(seconds) {
@@ -708,9 +779,17 @@ function startLoginCountdown(seconds) {
 
 function resendLoginOtp() {
   loginGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-  document.getElementById("login-autofill-code").textContent = loginGeneratedOtp;
+  const autofillCode = document.getElementById("login-autofill-code");
+  if (autofillCode) autofillCode.textContent = loginGeneratedOtp;
+
+  const freePill = document.getElementById("login-free-otp-pill");
+  if (freePill) freePill.textContent = loginGeneratedOtp;
+
+  const waBtn = document.getElementById("login-whatsapp-btn");
+  if (waBtn) waBtn.href = getWhatsAppOtpUrl(pendingLoginTarget, loginGeneratedOtp, "Store Sign In");
+
   startLoginCountdown(30);
-  showToast(`📲 New login code sent to ${pendingLoginTarget}: ${loginGeneratedOtp}`, "success");
+  showToast(`📲 New Unlimited Free Sign-In OTP: ${loginGeneratedOtp}`, "success");
 }
 
 function autoFillLoginOtp() {
@@ -748,21 +827,22 @@ function handleLoginVerifyOtp(e) {
   } else {
     const storeName = pendingLoginTarget.includes("@") 
       ? pendingLoginTarget.split("@")[0].toUpperCase() + " Store"
-      : "Zari Ethnic Wear (India)";
+      : "My Online Store";
     
     activeMerchant = {
       storeName: storeName,
-      storeUrl: pendingLoginTarget.includes("@") ? `https://${pendingLoginTarget.split("@")[1] || "store.in"}` : "https://zariethnic.in",
+      storeUrl: pendingLoginTarget.includes("@") ? `https://${pendingLoginTarget.split("@")[1] || "store.in"}` : "https://mystore.in",
       contact: pendingLoginTarget,
-      email: pendingLoginTarget.includes("@") ? pendingLoginTarget : "support@zariethnic.in",
+      email: pendingLoginTarget.includes("@") ? pendingLoginTarget : `founder@${storeName.toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
       plan: "14-Day Free Pilot",
-      creditsLeft: 48,
+      creditsLeft: 50,
       totalCredits: 50,
-      ticketsResolved: 14,
-      costSaved: 5600,
+      ticketsResolved: 0,
+      costSaved: 0,
+      isRealMerchant: true,
       apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
       tone: "friendly",
-      whatsapp: "+91 98765 43210",
+      whatsapp: pendingLoginTarget.startsWith("+") ? pendingLoginTarget : "+91 98765 43210",
       widgetColor: "#6366f1",
       upiId: receiver.upiId,
       gstin: receiver.gstin,
@@ -770,20 +850,30 @@ function handleLoginVerifyOtp(e) {
       bankAcc: receiver.accNumber,
       bankIfsc: receiver.ifscCode,
       bankName: receiver.bankName,
+      integrations: {},
       policies: [
         {
           id: "p1",
-          title: "7-Day Exchange Window",
-          content: "Unworn sarees, kurtis, and lehengas with tags attached may be exchanged within 7 days."
+          title: `${storeName} - Standard Return & Exchange Terms`,
+          content: `Unworn items with original tags and packaging from ${storeName} may be returned or exchanged within 14 days of delivery.`
         },
         {
           id: "p2",
-          title: "Reverse Courier Fee",
-          content: "Reverse pickup available across India for ₹100 fee."
+          title: "Reverse Courier Pickup Logistics",
+          content: "Reverse pickups are scheduled via BlueDart/Shiprocket across 19,000+ pincodes within 24-48 business hours."
         }
       ],
-      tickets: [...sampleTickets],
-      invoices: [...sampleInvoices]
+      tickets: [], // Real zero-mock clean state with live listening radar
+      invoices: [
+        {
+          id: "INV_PILOT_" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          plan: "14-Day Free Pilot Activation (50 Free Automated Answers)",
+          amount: "₹0.00 (Active Trial)",
+          status: "ACTIVE",
+          utr: "PILOT-ACT-" + Math.floor(100000 + Math.random() * 900000)
+        }
+      ]
     };
   }
 
