@@ -14,400 +14,725 @@
   <!-- Navigation -->
   <nav class="navbar" id="main-nav">
     <div class="container nav-container">
-      <a href="#" class="brand-logo" id="nav-brand-logo">
+      <a href="#" class="brand-logo" id="nav-brand-logo" onclick="switchView('landing')">
         <div class="logo-badge">🛡️</div>
         <span>PolicyPilot<span style="color: var(--cyan)">.ai</span></span>
       </a>
-      <ul class="nav-links">
+
+      <!-- Guest Links (Landing Page) -->
+      <ul class="nav-links" id="nav-guest-links">
         <li><a href="#demo" id="nav-link-demo">Live Demo</a></li>
         <li><a href="#calculator" id="nav-link-calc">ROI Calculator</a></li>
         <li><a href="#features" id="nav-link-features">Why It Works</a></li>
         <li><a href="#pricing" id="nav-link-pricing">Pricing</a></li>
         <li><a href="#embed" id="nav-link-embed">Embed Code</a></li>
       </ul>
-      <div class="nav-actions">
-        <button class="btn btn-secondary btn-sm" id="nav-btn-login" onclick="openPilotModal('Login')">Sign In</button>
+
+      <!-- Guest Actions -->
+      <div class="nav-actions" id="nav-guest-actions">
+        <button class="btn btn-secondary btn-sm" id="nav-btn-login" onclick="openLoginModal()">Sign In</button>
         <button class="btn btn-primary btn-sm" id="nav-btn-cta" onclick="openPilotModal('Header CTA')">Start Free Pilot</button>
+      </div>
+
+      <!-- Logged-in Merchant Actions (Dashboard Mode) -->
+      <div class="nav-actions" id="nav-user-actions" style="display: none;">
+        <span class="trust-shield" id="nav-store-badge">🟢 Store Active</span>
+        <button class="btn btn-secondary btn-sm" onclick="switchView('landing')">Storefront View</button>
+        <button class="btn btn-primary btn-sm" onclick="switchView('dashboard')">Dashboard</button>
+        <button class="btn btn-secondary btn-sm" style="color: #f43f5e;" onclick="logoutMerchant()">Sign Out</button>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <header class="hero" id="hero-section">
-    <div class="container">
-      <div class="pill-tag" id="hero-pill-badge">
-        <span class="pulse-dot"></span>
-        Built for Shopify, WooCommerce & D2C Brands
-      </div>
-      
-      <h1 class="hero-title" id="hero-main-title">
-        The AI Support Agent That <span class="gradient-text">Never Hallucinates</span> Store Policies
-      </h1>
-      
-      <p class="hero-subtitle" id="hero-main-desc">
-        Raw ChatGPT makes up fake return promises. PolicyPilot reads your store's exact policies, answers customer questions 24/7 with direct citations, and routes edge cases to your team.
-      </p>
-      
-      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <a href="#demo" class="btn btn-primary btn-lg" id="hero-btn-test-demo">
-          ⚡ Try Interactive Demo Below
-        </a>
-        <button class="btn btn-secondary btn-lg" id="hero-btn-claim-pilot" onclick="openPilotModal('Hero Main')">
-          🚀 Get 14-Day Free Pilot (50 Free Tickets)
-        </button>
-      </div>
-
-      <div class="hero-stats-row" id="hero-stats-container">
-        <div class="stat-item">
-          <div class="stat-number gradient">0.0%</div>
-          <div class="stat-label">Hallucination Rate (Citation-Guarded)</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">74%</div>
-          <div class="stat-label">Average Ticket Deflection</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number gradient">&lt; 1.5s</div>
-          <div class="stat-label">Instant Customer Resolution</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">$2,900+</div>
-          <div class="stat-label">Average Monthly Support Savings</div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <!-- Interactive Live Demo Section -->
-    <section class="demo-section" id="demo">
+  <!-- ==============================================
+       VIEW 1: PUBLIC LANDING PAGE & DEMO SANDBOX
+  ============================================== -->
+  <div id="landing-view" class="view-container">
+    <!-- Hero Section -->
+    <header class="hero" id="hero-section">
       <div class="container">
-        <div class="section-header">
-          <div class="pill-tag" style="background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.3); color: #67e8f9;">
-            Interactive Live Sandbox
-          </div>
-          <h2 class="section-title">Test PolicyPilot With Real Store Scenarios</h2>
-          <p class="section-desc">
-            Select a store profile or paste your own policies. Ask any tricky return, shipping, or warranty question and see the verified citations in real time.
-          </p>
+        <div class="pill-tag" id="hero-pill-badge">
+          <span class="pulse-dot"></span>
+          Built for Shopify, WooCommerce & D2C Brands
+        </div>
+        
+        <h1 class="hero-title" id="hero-main-title">
+          The AI Support Agent That <span class="gradient-text">Never Hallucinates</span> Store Policies
+        </h1>
+        
+        <p class="hero-subtitle" id="hero-main-desc">
+          Raw ChatGPT makes up fake return promises. PolicyPilot reads your store's exact policies, answers customer questions 24/7 with direct citations, and routes edge cases to your team.
+        </p>
+        
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+          <a href="#demo" class="btn btn-primary btn-lg" id="hero-btn-test-demo">
+            ⚡ Try Interactive Demo Below
+          </a>
+          <button class="btn btn-secondary btn-lg" id="hero-btn-claim-pilot" onclick="openPilotModal('Hero Main')">
+            🚀 Get 14-Day Free Pilot (50 Free Tickets)
+          </button>
         </div>
 
-        <div class="demo-wrapper" id="live-demo-card">
-          <!-- Sidebar: Store Selection & Policies -->
-          <div class="demo-sidebar">
-            <div class="sidebar-title">
-              <span>Select Merchant Profile</span>
-              <span style="font-size: 0.7rem; color: var(--emerald); font-weight: 600;">ACTIVE</span>
-            </div>
-
-            <div class="store-tabs" id="store-selector-group">
-              <button class="store-tab-btn active" id="tab-aerokicks" onclick="switchStore('aerokicks')">
-                <span class="store-tab-icon">👟</span>
-                <div>
-                  <div class="store-tab-name">AeroKicks Apparel</div>
-                  <div class="store-tab-meta">Sneakers & Streetwear • 30-Day Policy</div>
-                </div>
-              </button>
-
-              <button class="store-tab-btn" id="tab-glowbotanics" onclick="switchStore('glowbotanics')">
-                <span class="store-tab-icon">🌿</span>
-                <div>
-                  <div class="store-tab-name">GlowBotanics</div>
-                  <div class="store-tab-meta">Organic Skincare • 14-Day Open Box</div>
-                </div>
-              </button>
-
-              <button class="store-tab-btn" id="tab-pulsetech" onclick="switchStore('pulsetech')">
-                <span class="store-tab-icon">⚡</span>
-                <div>
-                  <div class="store-tab-name">PulseTech Gear</div>
-                  <div class="store-tab-meta">Audio & Gadgets • 1-Year Warranty</div>
-                </div>
-              </button>
-
-              <button class="store-tab-btn" id="tab-custom" onclick="switchStore('custom')">
-                <span class="store-tab-icon">✨</span>
-                <div>
-                  <div class="store-tab-name">Your Store (Custom)</div>
-                  <div class="store-tab-meta">Paste your policy or FAQ</div>
-                </div>
-              </button>
-            </div>
-
-            <!-- Policy Preview Box -->
-            <div class="policy-box">
-              <div class="policy-box-header">
-                <span id="active-policy-title">AEROKICKS STORE POLICY</span>
-                <span style="color: var(--cyan); font-size: 0.72rem;">INDEXED IN VECTOR DB</span>
-              </div>
-              <div class="policy-snippet" id="active-policy-text">
-                [Section 3.1: Returns]
-                Items in new, unworn condition with tags attached and original box may be returned within 30 days of delivery.
-                Shoes with dirt, scuffs, or street wear are NOT eligible for refund.
-                Domestic return label fee: $7.00 deducted from refund.
-                Final sale items (ending in .99) cannot be returned or exchanged.
-              </div>
-            </div>
-
-            <!-- Custom Policy Input (Hidden unless Custom tab selected) -->
-            <div class="custom-input-group" id="custom-policy-inputs" style="display: none;">
-              <label class="custom-input-label" for="custom-policy-textarea">Paste Your Store Policy / FAQs:</label>
-              <textarea id="custom-policy-textarea" class="custom-input" rows="3" placeholder="e.g. We accept returns within 14 days if unused. International buyers pay shipping..."></textarea>
-              <button class="btn btn-secondary btn-sm" id="btn-save-custom-policy" onclick="applyCustomPolicy()">Index My Policy</button>
-            </div>
+        <div class="hero-stats-row" id="hero-stats-container">
+          <div class="stat-item">
+            <div class="stat-number gradient">0.0%</div>
+            <div class="stat-label">Hallucination Rate (Citation-Guarded)</div>
           </div>
-
-          <!-- Chat Simulator -->
-          <div class="demo-chat">
-            <div class="chat-header">
-              <div class="agent-profile">
-                <div class="agent-avatar" id="chat-agent-avatar">👟</div>
-                <div class="agent-info">
-                  <h4 id="chat-agent-name">
-                    AeroKicks Support Assistant
-                    <span class="trust-shield">🛡️ Citation Guarded</span>
-                  </h4>
-                  <div class="agent-status-text" id="chat-agent-subtext">Powered by PolicyPilot Engine • Real-time RAG</div>
-                </div>
-              </div>
-              <button class="btn btn-secondary btn-sm" onclick="resetChat()" id="btn-clear-chat" title="Clear conversation">
-                🔄 Clear
-              </button>
-            </div>
-
-            <!-- Chat messages stream -->
-            <div class="chat-messages" id="chat-messages-container">
-              <!-- Initial Welcome Message -->
-              <div class="message agent">
-                <div class="msg-bubble">
-                  Hello! I'm your automated store support assistant. Ask me anything about our return windows, sizing, shipping rates, or exchange policies!
-                </div>
-              </div>
-            </div>
-
-            <!-- Quick Suggestion Chips -->
-            <div class="suggestion-chips" id="suggestion-chips-container">
-              <!-- Rendered dynamically by app.js based on selected store -->
-            </div>
-
-            <!-- Input Bar -->
-            <div class="chat-input-bar">
-              <input type="text" id="chat-user-input" placeholder="Type a customer question (e.g. 'Can I return shoes if I wore them outside?')..." onkeydown="handleInputKey(event)">
-              <button class="btn btn-primary" id="btn-send-chat" onclick="sendUserMessage()">
-                <span>Ask AI</span> ➔
-              </button>
-            </div>
+          <div class="stat-item">
+            <div class="stat-number">74%</div>
+            <div class="stat-label">Average Ticket Deflection</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number gradient">&lt; 1.5s</div>
+            <div class="stat-label">Instant Customer Resolution</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">$2,900+</div>
+            <div class="stat-label">Average Monthly Support Savings</div>
           </div>
         </div>
       </div>
-    </section>
+    </header>
 
-    <!-- ROI Calculator Section -->
-    <section class="roi-section" id="calculator">
-      <div class="container">
-        <div class="section-header">
-          <div class="pill-tag" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #6ee7b7;">
-            Instant ROI Breakdown
+    <main>
+      <!-- Interactive Live Demo Section -->
+      <section class="demo-section" id="demo">
+        <div class="container">
+          <div class="section-header">
+            <div class="pill-tag" style="background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.3); color: #67e8f9;">
+              Interactive Live Sandbox
+            </div>
+            <h2 class="section-title">Test PolicyPilot With Real Store Scenarios</h2>
+            <p class="section-desc">
+              Select a store profile or paste your own policies. Ask any tricky return, shipping, or warranty question and see the verified citations in real time.
+            </p>
           </div>
-          <h2 class="section-title">Calculate Your Monthly Profit & Hours Saved</h2>
-          <p class="section-desc">
-            See how much your store is currently spending on repetitive support tickets versus using PolicyPilot.
-          </p>
-        </div>
 
-        <div class="calc-card" id="roi-calculator-card">
-          <div class="calc-controls">
-            <div class="slider-group">
-              <div class="slider-header">
-                <span>Monthly Store Orders</span>
-                <span class="slider-val" id="orders-val-display">2,500</span>
+          <div class="demo-wrapper" id="live-demo-card">
+            <!-- Sidebar: Store Selection & Policies -->
+            <div class="demo-sidebar">
+              <div class="sidebar-title">
+                <span>Select Merchant Profile</span>
+                <span style="font-size: 0.7rem; color: var(--emerald); font-weight: 600;">ACTIVE</span>
               </div>
-              <input type="range" id="orders-slider" min="200" max="25000" step="100" value="2500" oninput="updateCalculator()">
-            </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <span>Support Tickets Per Month</span>
-                <span class="slider-val" id="tickets-val-display">500</span>
+              <div class="store-tabs" id="store-selector-group">
+                <button class="store-tab-btn active" id="tab-aerokicks" onclick="switchStore('aerokicks')">
+                  <span class="store-tab-icon">👟</span>
+                  <div>
+                    <div class="store-tab-name">AeroKicks Apparel</div>
+                    <div class="store-tab-meta">Sneakers & Streetwear • 30-Day Policy</div>
+                  </div>
+                </button>
+
+                <button class="store-tab-btn" id="tab-glowbotanics" onclick="switchStore('glowbotanics')">
+                  <span class="store-tab-icon">🌿</span>
+                  <div>
+                    <div class="store-tab-name">GlowBotanics</div>
+                    <div class="store-tab-meta">Organic Skincare • 14-Day Open Box</div>
+                  </div>
+                </button>
+
+                <button class="store-tab-btn" id="tab-pulsetech" onclick="switchStore('pulsetech')">
+                  <span class="store-tab-icon">⚡</span>
+                  <div>
+                    <div class="store-tab-name">PulseTech Gear</div>
+                    <div class="store-tab-meta">Audio & Gadgets • 1-Year Warranty</div>
+                  </div>
+                </button>
+
+                <button class="store-tab-btn" id="tab-custom" onclick="switchStore('custom')">
+                  <span class="store-tab-icon">✨</span>
+                  <div>
+                    <div class="store-tab-name">Your Store (Custom)</div>
+                    <div class="store-tab-meta">Paste your policy or FAQ</div>
+                  </div>
+                </button>
               </div>
-              <input type="range" id="tickets-slider" min="50" max="6000" step="25" value="500" oninput="updateCalculator()">
-            </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <span>Average Human Agent Cost (per ticket)</span>
-                <span class="slider-val" id="ticket-cost-display">$5.00</span>
+              <!-- Policy Preview Box -->
+              <div class="policy-box">
+                <div class="policy-box-header">
+                  <span id="active-policy-title">AEROKICKS STORE POLICY</span>
+                  <span style="color: var(--cyan); font-size: 0.72rem;">INDEXED IN VECTOR DB</span>
+                </div>
+                <div class="policy-snippet" id="active-policy-text">
+                  [Section 3.1: Returns]
+                  Items in new, unworn condition with tags attached and original box may be returned within 30 days of delivery.
+                  Shoes with dirt, scuffs, or street wear are NOT eligible for refund.
+                  Domestic return label fee: $7.00 deducted from refund.
+                  Final sale items (ending in .99) cannot be returned or exchanged.
+                </div>
               </div>
-              <input type="range" id="cost-slider" min="2" max="12" step="0.5" value="5" oninput="updateCalculator()">
+
+              <!-- Custom Policy Input (Hidden unless Custom tab selected) -->
+              <div class="custom-input-group" id="custom-policy-inputs" style="display: none;">
+                <label class="custom-input-label" for="custom-policy-textarea">Paste Your Store Policy / FAQs:</label>
+                <textarea id="custom-policy-textarea" class="custom-input" rows="3" placeholder="e.g. We accept returns within 14 days if unused. International buyers pay shipping..."></textarea>
+                <button class="btn btn-secondary btn-sm" id="btn-save-custom-policy" onclick="applyCustomPolicy()">Index My Policy</button>
+              </div>
+            </div>
+
+            <!-- Chat Simulator -->
+            <div class="demo-chat">
+              <div class="chat-header">
+                <div class="agent-profile">
+                  <div class="agent-avatar" id="chat-agent-avatar">👟</div>
+                  <div class="agent-info">
+                    <h4 id="chat-agent-name">
+                      AeroKicks Support Assistant
+                      <span class="trust-shield">🛡️ Citation Guarded</span>
+                    </h4>
+                    <div class="agent-status-text" id="chat-agent-subtext">Powered by PolicyPilot Engine • Real-time RAG</div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="resetChat()" id="btn-clear-chat" title="Clear conversation">
+                  🔄 Clear
+                </button>
+              </div>
+
+              <!-- Chat messages stream -->
+              <div class="chat-messages" id="chat-messages-container">
+                <div class="message agent">
+                  <div class="msg-bubble">
+                    Hello! I'm your automated store support assistant. Ask me anything about our return windows, sizing, shipping rates, or exchange policies!
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Suggestion Chips -->
+              <div class="suggestion-chips" id="suggestion-chips-container"></div>
+
+              <!-- Input Bar -->
+              <div class="chat-input-bar">
+                <input type="text" id="chat-user-input" placeholder="Type a customer question (e.g. 'Can I return shoes if I wore them outside?')..." onkeydown="handleInputKey(event)">
+                <button class="btn btn-primary" id="btn-send-chat" onclick="sendUserMessage()">
+                  <span>Ask AI</span> ➔
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div class="calc-results-box" id="roi-results-container">
-            <div class="savings-label">ESTIMATED NET ANNUAL SAVINGS</div>
-            <div class="savings-amount" id="savings-display">$21,612</div>
-            <div class="savings-breakdown" id="savings-breakdown-text">
-              Based on resolving <strong>75%</strong> of your 500 monthly tickets automatically with zero error rate.<br>
-              Current support expense: <strong>$2,500/mo</strong> • PolicyPilot: <strong>$199/mo</strong>.
+      <!-- ROI Calculator Section -->
+      <section class="roi-section" id="calculator">
+        <div class="container">
+          <div class="section-header">
+            <div class="pill-tag" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #6ee7b7;">
+              Instant ROI Breakdown
             </div>
-            <button class="btn btn-primary btn-lg" onclick="openPilotModal('Calculator CTA')">
-              Lock In These Savings With Free Pilot
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Why PolicyPilot Beats Standard Bots (Features) -->
-    <section class="features-section" id="features">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Built Different From Fragile Chatbots</h2>
-          <p class="section-desc">
-            Why high-growth online retailers trust PolicyPilot over standard ChatGPT plugins.
-          </p>
-        </div>
-
-        <div class="features-grid">
-          <div class="feature-card" id="feat-hallucination">
-            <div class="feature-icon-box">🛡️</div>
-            <h3>Dual-Engine Verification</h3>
-            <p>
-              Every response is checked by our internal critic against your real policy before being sent. If the customer asks for an unauthorized exception, it never lies.
+            <h2 class="section-title">Calculate Your Monthly Profit & Hours Saved</h2>
+            <p class="section-desc">
+              See how much your store is currently spending on repetitive support tickets versus using PolicyPilot.
             </p>
           </div>
 
-          <div class="feature-card" id="feat-citations">
-            <div class="feature-icon-box">📑</div>
-            <h3>Direct Policy Citations</h3>
-            <p>
-              Builds instant trust with buyers by explicitly referencing the policy section (e.g. <em>Section 4: Holiday Return Deadlines</em>), preventing disputes.
-            </p>
-          </div>
+          <div class="calc-card" id="roi-calculator-card">
+            <div class="calc-controls">
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Monthly Store Orders</span>
+                  <span class="slider-val" id="orders-val-display">2,500</span>
+                </div>
+                <input type="range" id="orders-slider" min="200" max="25000" step="100" value="2500" oninput="updateCalculator()">
+              </div>
 
-          <div class="feature-card" id="feat-escalation">
-            <div class="feature-icon-box">👥</div>
-            <h3>Human-in-the-Loop Escalation</h3>
-            <p>
-              When a buyer is genuinely angry or has a novel issue not covered in your knowledge base, the bot flags the conversation and routes directly to your staff.
-            </p>
-          </div>
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Support Tickets Per Month</span>
+                  <span class="slider-val" id="tickets-val-display">500</span>
+                </div>
+                <input type="range" id="tickets-slider" min="50" max="6000" step="25" value="500" oninput="updateCalculator()">
+              </div>
 
-          <div class="feature-card" id="feat-shopify">
-            <div class="feature-icon-box">🛍️</div>
-            <h3>1-Minute Store Embed</h3>
-            <p>
-              Add our lightweight floating chat widget to Shopify, WooCommerce, Webflow, or custom storefronts with just one line of code.
-            </p>
-          </div>
-
-          <div class="feature-card" id="feat-privacy">
-            <div class="feature-icon-box">🔒</div>
-            <h3>Fortified Multi-Tenant Privacy</h3>
-            <p>
-              Your store policies and customer conversations are encrypted with tenant-isolated security. Your data is never used to train global AI models.
-            </p>
-          </div>
-
-          <div class="feature-card" id="feat-analytics">
-            <div class="feature-icon-box">📈</div>
-            <h3>Actionable Policy Intelligence</h3>
-            <p>
-              See exactly what confuses your customers most. Discover gaps in your sizing charts or shipping FAQs before they hurt your conversion rate.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Embed Code Snippet Generator Section -->
-    <section class="embed-section" id="embed">
-      <div class="container">
-        <div class="embed-box">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-            <div>
-              <h3 style="font-size: 1.3rem; font-weight: 700;">Embed on Your Storefront in 60 Seconds</h3>
-              <p style="color: var(--text-secondary); font-size: 0.9rem;">Paste this snippet just before the closing <code>&lt;/body&gt;</code> tag of your Shopify theme or website.</p>
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Average Human Agent Cost (per ticket)</span>
+                  <span class="slider-val" id="ticket-cost-display">$5.00</span>
+                </div>
+                <input type="range" id="cost-slider" min="2" max="12" step="0.5" value="5" oninput="updateCalculator()">
+              </div>
             </div>
-            <span class="trust-shield">Works on Shopify, WooCommerce & Custom HTML</span>
+
+            <div class="calc-results-box" id="roi-results-container">
+              <div class="savings-label">ESTIMATED NET ANNUAL SAVINGS</div>
+              <div class="savings-amount" id="savings-display">$21,612</div>
+              <div class="savings-breakdown" id="savings-breakdown-text">
+                Based on resolving <strong>75%</strong> of your 500 monthly tickets automatically with zero error rate.<br>
+                Current support expense: <strong>$2,500/mo</strong> • PolicyPilot: <strong>$199/mo</strong>.
+              </div>
+              <button class="btn btn-primary btn-lg" onclick="openPilotModal('Calculator CTA')">
+                Lock In These Savings With Free Pilot
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Why PolicyPilot Beats Standard Bots (Features) -->
+      <section class="features-section" id="features">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Built Different From Fragile Chatbots</h2>
+            <p class="section-desc">
+              Why high-growth online retailers trust PolicyPilot over standard ChatGPT plugins.
+            </p>
           </div>
 
-          <div class="code-container">
-            <pre><code id="embed-code-snippet">&lt;!-- PolicyPilot AI Floating Widget --&gt;
+          <div class="features-grid">
+            <div class="feature-card" id="feat-hallucination">
+              <div class="feature-icon-box">🛡️</div>
+              <h3>Dual-Engine Verification</h3>
+              <p>
+                Every response is checked by our internal critic against your real policy before being sent. If the customer asks for an unauthorized exception, it never lies.
+              </p>
+            </div>
+
+            <div class="feature-card" id="feat-citations">
+              <div class="feature-icon-box">📑</div>
+              <h3>Direct Policy Citations</h3>
+              <p>
+                Builds instant trust with buyers by explicitly referencing the policy section (e.g. <em>Section 4: Holiday Return Deadlines</em>), preventing disputes.
+              </p>
+            </div>
+
+            <div class="feature-card" id="feat-escalation">
+              <div class="feature-icon-box">👥</div>
+              <h3>Human-in-the-Loop Escalation</h3>
+              <p>
+                When a buyer is genuinely angry or has a novel issue not covered in your knowledge base, the bot flags the conversation and routes directly to your staff.
+              </p>
+            </div>
+
+            <div class="feature-card" id="feat-shopify">
+              <div class="feature-icon-box">🛍️</div>
+              <h3>1-Minute Store Embed</h3>
+              <p>
+                Add our lightweight floating chat widget to Shopify, WooCommerce, Webflow, or custom storefronts with just one line of code.
+              </p>
+            </div>
+
+            <div class="feature-card" id="feat-privacy">
+              <div class="feature-icon-box">🔒</div>
+              <h3>Fortified Multi-Tenant Privacy</h3>
+              <p>
+                Your store policies and customer conversations are encrypted with tenant-isolated security. Your data is never used to train global AI models.
+              </p>
+            </div>
+
+            <div class="feature-card" id="feat-analytics">
+              <div class="feature-icon-box">📈</div>
+              <h3>Actionable Policy Intelligence</h3>
+              <p>
+                See exactly what confuses your customers most. Discover gaps in your sizing charts or shipping FAQs before they hurt your conversion rate.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Embed Code Snippet Generator Section -->
+      <section class="embed-section" id="embed">
+        <div class="container">
+          <div class="embed-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 style="font-size: 1.3rem; font-weight: 700;">Embed on Your Storefront in 60 Seconds</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Paste this snippet just before the closing <code>&lt;/body&gt;</code> tag of your Shopify theme or website.</p>
+              </div>
+              <span class="trust-shield">Works on Shopify, WooCommerce & Custom HTML</span>
+            </div>
+
+            <div class="code-container">
+              <pre><code id="embed-code-snippet">&lt;!-- PolicyPilot AI Floating Widget --&gt;
 &lt;script 
-  src="https://cdn.policypilot.ai/v1/widget.js" 
+  src="https://getpolicypilot.vercel.app/widget.js" 
   data-store-id="YOUR_STORE_ID" 
   data-theme="dark" 
   async&gt;
 &lt;/script&gt;</code></pre>
-            <button class="btn btn-secondary btn-sm copy-btn" id="btn-copy-embed" onclick="copyEmbedCode()">
-              📋 Copy Code
+              <button class="btn btn-secondary btn-sm copy-btn" id="btn-copy-embed" onclick="copyEmbedCode()">
+                📋 Copy Code
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Transparent Pricing Section -->
+      <section class="pricing-section" id="pricing">
+        <div class="container">
+          <div class="section-header">
+            <div class="pill-tag">Simple, Usage-Aligned Pricing</div>
+            <h2 class="section-title">Invest in Savings, Not Extra Headcount</h2>
+            <p class="section-desc">
+              All plans include a 14-day risk-free trial. If PolicyPilot doesn't deflect at least 40% of your tickets, you pay nothing.
+            </p>
+          </div>
+
+          <div class="pricing-grid">
+            <div class="pricing-card" id="pricing-starter">
+              <div class="plan-name">Starter Pilot</div>
+              <div class="plan-desc">For growing boutiques and emerging D2C brands.</div>
+              <div class="plan-price">$79 <span>/ month</span></div>
+              <ul class="plan-features">
+                <li><span>✓</span> Up to 1,000 automated answers</li>
+                <li><span>✓</span> Guaranteed 0% hallucination guard</li>
+                <li><span>✓</span> Full policy citations</li>
+                <li><span>✓</span> Standard web & Shopify widget</li>
+                <li><span>✓</span> Email support</li>
+              </ul>
+              <button class="btn btn-secondary" onclick="openPilotModal('Starter Plan')">Start 14-Day Free Pilot</button>
+            </div>
+
+            <div class="pricing-card featured" id="pricing-growth">
+              <div class="popular-badge">Most Popular</div>
+              <div class="plan-name">Growth Store</div>
+              <div class="plan-desc">For high-volume brands ready to automate repetitive tickets.</div>
+              <div class="plan-price">$199 <span>/ month</span></div>
+              <ul class="plan-features">
+                <li><span>✓</span> Up to 4,000 automated answers</li>
+                <li><span>✓</span> Human-in-the-loop escalation routing</li>
+                <li><span>✓</span> Custom brand voice & color theming</li>
+                <li><span>✓</span> Analytics & policy gap dashboard</li>
+                <li><span>✓</span> Priority Slack & WhatsApp support</li>
+              </ul>
+              <button class="btn btn-primary" onclick="openPilotModal('Growth Plan')">Start 14-Day Free Pilot</button>
+            </div>
+
+            <div class="pricing-card" id="pricing-scale">
+              <div class="plan-name">Omnichannel Scale</div>
+              <div class="plan-desc">For established retail operations & multi-store setups.</div>
+              <div class="plan-price">$499 <span>/ month</span></div>
+              <ul class="plan-features">
+                <li><span>✓</span> Up to 15,000 automated answers</li>
+                <li><span>✓</span> Multiple storefront domains</li>
+                <li><span>✓</span> Gorgias, Zendesk & Klaviyo integrations</li>
+                <li><span>✓</span> Dedicated account onboarding engineer</li>
+                <li><span>✓</span> 99.9% uptime SLA</li>
+              </ul>
+              <button class="btn btn-secondary" onclick="openPilotModal('Scale Plan')">Talk to Founder</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
+            <span>🛡️ PolicyPilot.ai</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">• The Zero-Hallucination AI Support Copilot</span>
+          </div>
+          <div>
+            &copy; 2026 PolicyPilot AI, Inc. Built on enterprise AI-native multi-tenant architecture.
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==============================================
+       VIEW 2: MERCHANT COMMAND CENTER (DASHBOARD)
+  ============================================== -->
+  <div id="dashboard-view" class="view-container" style="display: none;">
+    <!-- Dashboard Header Banner -->
+    <div class="dashboard-header-banner">
+      <div class="container">
+        <div class="dash-top-bar">
+          <div class="dash-store-title">
+            <div class="dash-store-avatar" id="dash-avatar-display">🛍️</div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <h2 style="font-size: 1.6rem; font-weight: 800;" id="dash-store-name-display">Acme Apparel</h2>
+                <span class="trust-shield" id="dash-plan-badge">14-Day Free Pilot</span>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.85rem;" id="dash-store-url-display">https://acmeapparel.com • Policy AI Engine Connected</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-secondary btn-sm" onclick="triggerSimulatedTicket()">
+              ⚡ Simulate Customer Ticket
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="switchDashTab('embed')">
+              🛠️ Get Embed Snippet
             </button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Transparent Pricing Section -->
-    <section class="pricing-section" id="pricing">
-      <div class="container">
-        <div class="section-header">
-          <div class="pill-tag">Simple, Usage-Aligned Pricing</div>
-          <h2 class="section-title">Invest in Savings, Not Extra Headcount</h2>
-          <p class="section-desc">
-            All plans include a 14-day risk-free trial. If PolicyPilot doesn't deflect at least 40% of your tickets, you pay nothing.
-          </p>
+    <div class="container">
+      <!-- 4 Live Metric Cards -->
+      <div class="dash-metrics-grid">
+        <div class="dash-metric-card">
+          <div class="metric-card-top">
+            <span>PILOT USAGE CREDITS</span>
+            <span>⚡ REAL-TIME</span>
+          </div>
+          <div class="metric-card-val" id="dash-credits-display">48 / 50</div>
+          <div class="metric-card-sub" style="color: var(--cyan);">
+            <span>●</span> 2 automated answers resolved today
+          </div>
         </div>
 
-        <div class="pricing-grid">
-          <!-- Starter -->
-          <div class="pricing-card" id="pricing-starter">
-            <div class="plan-name">Starter Pilot</div>
-            <div class="plan-desc">For growing boutiques and emerging D2C brands.</div>
-            <div class="plan-price">$79 <span>/ month</span></div>
-            <ul class="plan-features">
-              <li><span>✓</span> Up to 1,000 automated answers</li>
-              <li><span>✓</span> Guaranteed 0% hallucination guard</li>
-              <li><span>✓</span> Full policy citations</li>
-              <li><span>✓</span> Standard web & Shopify widget</li>
-              <li><span>✓</span> Email support</li>
-            </ul>
-            <button class="btn btn-secondary" onclick="openPilotModal('Starter Plan')">Start 14-Day Free Pilot</button>
+        <div class="dash-metric-card">
+          <div class="metric-card-top">
+            <span>TICKETS RESOLVED</span>
+            <span>📈 +100%</span>
           </div>
-
-          <!-- Growth (Featured) -->
-          <div class="pricing-card featured" id="pricing-growth">
-            <div class="popular-badge">Most Popular</div>
-            <div class="plan-name">Growth Store</div>
-            <div class="plan-desc">For high-volume brands ready to automate repetitive tickets.</div>
-            <div class="plan-price">$199 <span>/ month</span></div>
-            <ul class="plan-features">
-              <li><span>✓</span> Up to 4,000 automated answers</li>
-              <li><span>✓</span> Human-in-the-loop escalation routing</li>
-              <li><span>✓</span> Custom brand voice & color theming</li>
-              <li><span>✓</span> Analytics & policy gap dashboard</li>
-              <li><span>✓</span> Priority Slack & WhatsApp support</li>
-            </ul>
-            <button class="btn btn-primary" onclick="openPilotModal('Growth Plan')">Start 14-Day Free Pilot</button>
+          <div class="metric-card-val" id="dash-tickets-resolved-display">14</div>
+          <div class="metric-card-sub">
+            <span>✓</span> 78% average inbox deflection
           </div>
+        </div>
 
-          <!-- Scale -->
-          <div class="pricing-card" id="pricing-scale">
-            <div class="plan-name">Omnichannel Scale</div>
-            <div class="plan-desc">For established retail operations & multi-store setups.</div>
-            <div class="plan-price">$499 <span>/ month</span></div>
-            <ul class="plan-features">
-              <li><span>✓</span> Up to 15,000 automated answers</li>
-              <li><span>✓</span> Multiple storefront domains</li>
-              <li><span>✓</span> Gorgias, Zendesk & Klaviyo integrations</li>
-              <li><span>✓</span> Dedicated account onboarding engineer</li>
-              <li><span>✓</span> 99.9% uptime SLA</li>
-            </ul>
-            <button class="btn btn-secondary" onclick="openPilotModal('Scale Plan')">Talk to Founder</button>
+        <div class="dash-metric-card">
+          <div class="metric-card-top">
+            <span>HALLUCINATION RATE</span>
+            <span>🛡️ GUARDED</span>
+          </div>
+          <div class="metric-card-val" style="color: var(--emerald);">0.0%</div>
+          <div class="metric-card-sub">
+            <span>✓</span> 100% policy-citation verified
+          </div>
+        </div>
+
+        <div class="dash-metric-card">
+          <div class="metric-card-top">
+            <span>SUPPORT COST SAVED</span>
+            <span>💵 NET ROI</span>
+          </div>
+          <div class="metric-card-val" style="color: #38bdf8;" id="dash-cost-saved-display">$70.00</div>
+          <div class="metric-card-sub">
+            <span>⏱️</span> ~2.3 human labor hours saved
           </div>
         </div>
       </div>
-    </section>
-  </main>
+
+      <!-- Dashboard Nav Tabs -->
+      <div class="dash-tabs-bar">
+        <button class="dash-tab-btn active" id="btn-tab-tickets" onclick="switchDashTab('tickets')">
+          <span>📊</span> Live Ticket Activity
+        </button>
+        <button class="dash-tab-btn" id="btn-tab-policies" onclick="switchDashTab('policies')">
+          <span>📑</span> Store Policies & Knowledge Base
+        </button>
+        <button class="dash-tab-btn" id="btn-tab-agent" onclick="switchDashTab('agent')">
+          <span>💬</span> Test AI Agent Sandbox
+        </button>
+        <button class="dash-tab-btn" id="btn-tab-embed" onclick="switchDashTab('embed')">
+          <span>🛍️</span> Shopify & Web Embed
+        </button>
+        <button class="dash-tab-btn" id="btn-tab-billing" onclick="switchDashTab('billing')">
+          <span>💳</span> Plans & Billing
+        </button>
+      </div>
+
+      <!-- TAB 1: Live Ticket Feed -->
+      <div class="dash-panel active" id="panel-tickets">
+        <div class="ticket-table-wrapper">
+          <div class="table-header-bar">
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 700;">Live Ticket Activity Feed</h3>
+              <p style="color: var(--text-muted); font-size: 0.8rem;">Real-time inquiries handled by PolicyPilot on your storefront.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="triggerSimulatedTicket()">
+              + Simulate New Inquiry
+            </button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="ticket-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Customer Query</th>
+                  <th>AI Response Summary</th>
+                  <th>Policy Citation</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="ticket-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Knowledge Base & Policies Manager -->
+      <div class="dash-panel" id="panel-policies">
+        <div class="policies-manager-grid">
+          <!-- Active Policies List -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 1.15rem; font-weight: 700;">Active Policy Documents</h3>
+              <span class="trust-shield">Auto-Indexed in Vector DB</span>
+            </div>
+            <div id="active-policies-list-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Add New Policy Form -->
+          <div class="embed-step-card" style="margin-bottom: 0;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Add New Policy Rule / FAQ</h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">
+              Add new return guidelines, holiday delivery cutoffs, or warranty terms. The AI will immediately cite them in future answers.
+            </p>
+            <form onsubmit="handleAddNewPolicy(event)">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                  <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Policy Title / Section</label>
+                  <input type="text" id="new-policy-title" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Holiday Shipping Cutoff 2026" required>
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Exact Policy Rule / Clause</label>
+                  <textarea id="new-policy-content" class="custom-input" style="width: 100%; margin-top: 4px;" rows="4" placeholder="e.g. All orders placed before December 20 qualify for guaranteed Christmas delivery via complimentary FedEx 2-Day Air..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btn-save-new-policy">
+                  ➕ Index Into Store AI Brain
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Test AI Agent Sandbox -->
+      <div class="dash-panel" id="panel-agent">
+        <div class="demo-wrapper" style="min-height: 480px;">
+          <div class="demo-sidebar" style="background: rgba(10, 14, 26, 0.9);">
+            <div class="sidebar-title">
+              <span>Merchant Test Console</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.85rem;">
+              Test how PolicyPilot answers shopper inquiries based on your live store policies. It strictly enforces the rules you defined.
+            </p>
+            <div class="policy-box" style="margin-top: 10px;">
+              <div class="policy-box-header">ACTIVE POLICIES COUNT</div>
+              <div style="font-size: 1.4rem; font-weight: 800; color: var(--cyan);" id="dash-active-policies-count">3 Rules</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Zero-hallucination critic engine enabled</div>
+            </div>
+          </div>
+
+          <div class="demo-chat">
+            <div class="chat-header">
+              <div class="agent-profile">
+                <div class="agent-avatar">🛡️</div>
+                <div class="agent-info">
+                  <h4 id="dash-agent-name">Your Store AI Assistant</h4>
+                  <div class="agent-status-text">Connected to live vector embeddings</div>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="resetDashChat()">Clear</button>
+            </div>
+            <div class="chat-messages" id="dash-chat-messages-container" style="max-height: 340px;">
+              <div class="message agent">
+                <div class="msg-bubble">
+                  Hello! I'm your store's dedicated support assistant. Ask me anything about your policies to test my answers!
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <input type="text" id="dash-chat-input" placeholder="Test a customer question (e.g. 'What is our holiday return window?')..." onkeydown="handleDashChatKey(event)">
+              <button class="btn btn-primary" onclick="sendDashChatMessage()">Ask AI ➔</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Shopify & Storefront Embed -->
+      <div class="dash-panel" id="panel-embed">
+        <div class="embed-step-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 700;">Your Store's Embed Code</h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">Add this script to your Shopify theme or website to activate the floating support bubble.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="launchLiveFloatingWidget()">
+              🚀 Launch Test Widget on Screen
+            </button>
+          </div>
+
+          <div class="code-container">
+            <pre><code id="dash-embed-snippet">&lt;!-- PolicyPilot AI Storefront Widget --&gt;
+&lt;script 
+  src="https://getpolicypilot.vercel.app/widget.js" 
+  data-store-id="YOUR_STORE_SLUG" 
+  data-theme="dark" 
+  async&gt;
+&lt;/script&gt;</code></pre>
+            <button class="btn btn-secondary btn-sm copy-btn" onclick="copyDashEmbedCode()">
+              📋 Copy Code
+            </button>
+          </div>
+
+          <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 8px;">Shopify 1-Minute Installation Instructions:</h4>
+            <ol style="color: var(--text-secondary); font-size: 0.85rem; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+              <li>In your Shopify Admin, go to <strong>Online Store ➔ Themes</strong>.</li>
+              <li>Click <strong>... ➔ Edit code</strong> next to your active theme.</li>
+              <li>Open <code>theme.liquid</code> and scroll to the very bottom.</li>
+              <li>Paste the code snippet right before the closing <code>&lt;/body&gt;</code> tag and click <strong>Save</strong>.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: Plans & Billing -->
+      <div class="dash-panel" id="panel-billing">
+        <div class="embed-step-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+            <div>
+              <div class="pill-tag" style="margin-bottom: 6px;">Active Subscription</div>
+              <h3 style="font-size: 1.4rem; font-weight: 800;" id="billing-current-plan">14-Day Free Pilot</h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">Includes 50 automated answers and full policy verification.</p>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 1.8rem; font-weight: 800; color: var(--emerald);" id="billing-credits-left">48 Left</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">of 50 pilot credits</div>
+            </div>
+          </div>
+
+          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Upgrade Your Store's Plan</h4>
+          <div class="pricing-grid" style="margin-top: 0;">
+            <div class="pricing-card">
+              <div class="plan-name">Starter Plan</div>
+              <div class="plan-desc">For growing boutiques.</div>
+              <div class="plan-price">$79 <span>/ mo</span></div>
+              <ul class="plan-features">
+                <li><span>✓</span> 1,000 automated answers / mo</li>
+                <li><span>✓</span> Zero-hallucination guarantee</li>
+                <li><span>✓</span> Standard Shopify embed</li>
+              </ul>
+              <button class="btn btn-secondary" onclick="upgradePlanTier('Starter', 79, 1000)">Upgrade to Starter</button>
+            </div>
+
+            <div class="pricing-card featured">
+              <div class="popular-badge">Recommended</div>
+              <div class="plan-name">Growth Store</div>
+              <div class="plan-desc">For high-volume retail.</div>
+              <div class="plan-price">$199 <span>/ mo</span></div>
+              <ul class="plan-features">
+                <li><span>✓</span> 4,000 automated answers / mo</li>
+                <li><span>✓</span> Human escalation routing</li>
+                <li><span>✓</span> Custom brand colors & styling</li>
+              </ul>
+              <button class="btn btn-primary" onclick="upgradePlanTier('Growth', 199, 4000)">Upgrade to Growth</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       MODALS: PILOT SIGNUP & QUICK LOGIN
+  ============================================== -->
 
   <!-- Pilot Signup Modal -->
   <div class="modal-overlay" id="pilot-modal" onclick="closeModalOnBackdrop(event)">
@@ -417,7 +742,7 @@
         <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
         <h3 style="font-size: 1.4rem; font-weight: 800;">Get Your 14-Day Free Pilot</h3>
         <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
-          We'll set up your store's zero-hallucination agent in 24 hours. No credit card required.
+          Enter your store details. You will get instant access to your merchant command center.
         </p>
       </div>
 
@@ -436,7 +761,37 @@
             <input type="email" id="founder-email-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="founder@yourstore.com" required>
           </div>
           <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-pilot" style="width: 100%; margin-top: 8px;">
-            Activate My Free Store Pilot ➔
+            Activate My Store Command Center ➔
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sign In Modal -->
+  <div class="modal-overlay" id="login-modal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
+        <h3 style="font-size: 1.4rem; font-weight: 800;">Sign In to Store Dashboard</h3>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
+          Enter your email or log in instantly as a demo store.
+        </p>
+      </div>
+
+      <form onsubmit="handleLoginSubmit(event)">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Work Email</label>
+            <input type="email" id="login-email-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="founder@yourstore.com" required value="founder@aerokicks.com">
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            Sign In to Dashboard ➔
+          </button>
+          <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 4px 0;">— OR —</div>
+          <button type="button" class="btn btn-secondary" onclick="quickLoginDemoStore()" style="width: 100%;">
+            ⚡ Quick Demo Sign In (AeroKicks Apparel)
           </button>
         </div>
       </form>
@@ -448,21 +803,6 @@
     <span id="toast-icon">✅</span>
     <span id="toast-msg">Notification message</span>
   </div>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
-          <span>🛡️ PolicyPilot.ai</span>
-          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">• The Zero-Hallucination AI Support Copilot</span>
-        </div>
-        <div>
-          &copy; 2026 PolicyPilot AI, Inc. Built on enterprise AI-native multi-tenant architecture.
-        </div>
-      </div>
-    </div>
-  </footer>
 
   <script src="app.js"></script>
 </body>
