@@ -1270,3 +1270,243 @@ footer {
   margin-bottom: 24px;
 }
 
+/* ==============================================
+   STRIPE PAYMENT GATEWAY & INVOICING STYLES
+============================================== */
+.stripe-modal-content {
+  max-width: 520px;
+}
+
+.stripe-badge-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  font-size: 0.8rem;
+  color: #a5b4fc;
+}
+
+.stripe-powered-text {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+}
+
+.card-input-box {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-number-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-input-clean {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font-mono);
+  width: 100%;
+}
+
+.card-split-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+}
+
+.invoices-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-top: 16px;
+}
+
+.invoices-list-table th {
+  padding: 10px 14px;
+  background: rgba(13, 18, 34, 0.8);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.invoices-list-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.btn-invoice-download {
+  color: var(--cyan);
+  text-decoration: none;
+  font-size: 0.78rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* ==============================================
+   FAQ ACCORDION STYLES
+============================================== */
+.faq-section {
+  padding: 80px 0 100px;
+}
+
+.faq-container {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.faq-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.faq-item:hover {
+  border-color: var(--border-accent);
+}
+
+.faq-question {
+  padding: 20px 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.faq-chevron {
+  font-size: 1.1rem;
+  transition: transform 0.25s ease;
+  color: var(--text-muted);
+}
+
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+  color: var(--primary);
+}
+
+.faq-answer {
+  display: none;
+  padding: 0 24px 20px;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.faq-item.open .faq-answer {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ==============================================
+   LEGAL POLICIES MODALS
+============================================== */
+.legal-modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.legal-modal-body h4 {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ==============================================
+   COOKIE CONSENT BANNER
+============================================== */
+.cookie-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  max-width: 440px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid var(--border-accent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+.cookie-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ==============================================
+   MERCHANT SETTINGS TAB
+============================================== */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 800px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.api-key-box {
+  background: #060913;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #38bdf8;
+  margin-top: 8px;
+}
+
+

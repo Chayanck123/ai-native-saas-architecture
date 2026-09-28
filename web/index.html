@@ -25,7 +25,7 @@
         <li><a href="#calculator" id="nav-link-calc">ROI Calculator</a></li>
         <li><a href="#features" id="nav-link-features">Why It Works</a></li>
         <li><a href="#pricing" id="nav-link-pricing">Pricing</a></li>
-        <li><a href="#embed" id="nav-link-embed">Embed Code</a></li>
+        <li><a href="#faq" id="nav-link-faq">FAQ</a></li>
       </ul>
 
       <!-- Guest Actions -->
@@ -165,7 +165,7 @@
                 </div>
               </div>
 
-              <!-- Custom Policy Input (Hidden unless Custom tab selected) -->
+              <!-- Custom Policy Input -->
               <div class="custom-input-group" id="custom-policy-inputs" style="display: none;">
                 <label class="custom-input-label" for="custom-policy-textarea">Paste Your Store Policy / FAQs:</label>
                 <textarea id="custom-policy-textarea" class="custom-input" rows="3" placeholder="e.g. We accept returns within 14 days if unused. International buyers pay shipping..."></textarea>
@@ -191,7 +191,6 @@
                 </button>
               </div>
 
-              <!-- Chat messages stream -->
               <div class="chat-messages" id="chat-messages-container">
                 <div class="message agent">
                   <div class="msg-bubble">
@@ -200,10 +199,8 @@
                 </div>
               </div>
 
-              <!-- Quick Suggestion Chips -->
               <div class="suggestion-chips" id="suggestion-chips-container"></div>
 
-              <!-- Input Bar -->
               <div class="chat-input-bar">
                 <input type="text" id="chat-user-input" placeholder="Type a customer question (e.g. 'Can I return shoes if I wore them outside?')..." onkeydown="handleInputKey(event)">
                 <button class="btn btn-primary" id="btn-send-chat" onclick="sendUserMessage()">
@@ -270,96 +267,6 @@
         </div>
       </section>
 
-      <!-- Why PolicyPilot Beats Standard Bots (Features) -->
-      <section class="features-section" id="features">
-        <div class="container">
-          <div class="section-header">
-            <h2 class="section-title">Built Different From Fragile Chatbots</h2>
-            <p class="section-desc">
-              Why high-growth online retailers trust PolicyPilot over standard ChatGPT plugins.
-            </p>
-          </div>
-
-          <div class="features-grid">
-            <div class="feature-card" id="feat-hallucination">
-              <div class="feature-icon-box">🛡️</div>
-              <h3>Dual-Engine Verification</h3>
-              <p>
-                Every response is checked by our internal critic against your real policy before being sent. If the customer asks for an unauthorized exception, it never lies.
-              </p>
-            </div>
-
-            <div class="feature-card" id="feat-citations">
-              <div class="feature-icon-box">📑</div>
-              <h3>Direct Policy Citations</h3>
-              <p>
-                Builds instant trust with buyers by explicitly referencing the policy section (e.g. <em>Section 4: Holiday Return Deadlines</em>), preventing disputes.
-              </p>
-            </div>
-
-            <div class="feature-card" id="feat-escalation">
-              <div class="feature-icon-box">👥</div>
-              <h3>Human-in-the-Loop Escalation</h3>
-              <p>
-                When a buyer is genuinely angry or has a novel issue not covered in your knowledge base, the bot flags the conversation and routes directly to your staff.
-              </p>
-            </div>
-
-            <div class="feature-card" id="feat-shopify">
-              <div class="feature-icon-box">🛍️</div>
-              <h3>1-Minute Store Embed</h3>
-              <p>
-                Add our lightweight floating chat widget to Shopify, WooCommerce, Webflow, or custom storefronts with just one line of code.
-              </p>
-            </div>
-
-            <div class="feature-card" id="feat-privacy">
-              <div class="feature-icon-box">🔒</div>
-              <h3>Fortified Multi-Tenant Privacy</h3>
-              <p>
-                Your store policies and customer conversations are encrypted with tenant-isolated security. Your data is never used to train global AI models.
-              </p>
-            </div>
-
-            <div class="feature-card" id="feat-analytics">
-              <div class="feature-icon-box">📈</div>
-              <h3>Actionable Policy Intelligence</h3>
-              <p>
-                See exactly what confuses your customers most. Discover gaps in your sizing charts or shipping FAQs before they hurt your conversion rate.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Embed Code Snippet Generator Section -->
-      <section class="embed-section" id="embed">
-        <div class="container">
-          <div class="embed-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-              <div>
-                <h3 style="font-size: 1.3rem; font-weight: 700;">Embed on Your Storefront in 60 Seconds</h3>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Paste this snippet just before the closing <code>&lt;/body&gt;</code> tag of your Shopify theme or website.</p>
-              </div>
-              <span class="trust-shield">Works on Shopify, WooCommerce & Custom HTML</span>
-            </div>
-
-            <div class="code-container">
-              <pre><code id="embed-code-snippet">&lt;!-- PolicyPilot AI Floating Widget --&gt;
-&lt;script 
-  src="https://getpolicypilot.vercel.app/widget.js" 
-  data-store-id="YOUR_STORE_ID" 
-  data-theme="dark" 
-  async&gt;
-&lt;/script&gt;</code></pre>
-              <button class="btn btn-secondary btn-sm copy-btn" id="btn-copy-embed" onclick="copyEmbedCode()">
-                📋 Copy Code
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- Transparent Pricing Section -->
       <section class="pricing-section" id="pricing">
         <div class="container">
@@ -383,7 +290,7 @@
                 <li><span>✓</span> Standard web & Shopify widget</li>
                 <li><span>✓</span> Email support</li>
               </ul>
-              <button class="btn btn-secondary" onclick="openPilotModal('Starter Plan')">Start 14-Day Free Pilot</button>
+              <button class="btn btn-secondary" onclick="openStripeModal('Starter Plan', 79, 1000)">Subscribe with Stripe ($79/mo)</button>
             </div>
 
             <div class="pricing-card featured" id="pricing-growth">
@@ -398,7 +305,7 @@
                 <li><span>✓</span> Analytics & policy gap dashboard</li>
                 <li><span>✓</span> Priority Slack & WhatsApp support</li>
               </ul>
-              <button class="btn btn-primary" onclick="openPilotModal('Growth Plan')">Start 14-Day Free Pilot</button>
+              <button class="btn btn-primary" onclick="openStripeModal('Growth Store', 199, 4000)">Subscribe with Stripe ($199/mo)</button>
             </div>
 
             <div class="pricing-card" id="pricing-scale">
@@ -412,7 +319,70 @@
                 <li><span>✓</span> Dedicated account onboarding engineer</li>
                 <li><span>✓</span> 99.9% uptime SLA</li>
               </ul>
-              <button class="btn btn-secondary" onclick="openPilotModal('Scale Plan')">Talk to Founder</button>
+              <button class="btn btn-secondary" onclick="openContactModal('Omnichannel Scale Plan')">Talk to Sales</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ Section -->
+      <section class="faq-section" id="faq">
+        <div class="container">
+          <div class="section-header">
+            <div class="pill-tag">Frequently Asked Questions</div>
+            <h2 class="section-title">Everything You Need to Know</h2>
+            <p class="section-desc">Got questions about integrations, security, or guarantees? We've got answers.</p>
+          </div>
+
+          <div class="faq-container">
+            <div class="faq-item open" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span>How does PolicyPilot guarantee 0% hallucinations?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Unlike raw ChatGPT models which guess when uncertain, PolicyPilot uses a dual-engine architecture: every draft answer is audited by an internal Critic model against your exact indexed policy text. If the answer cannot be cited directly from your policy documents, the assistant does not bluff—it politely escalates the customer's request to your human team.
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span>How difficult is it to install on Shopify or WooCommerce?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                It takes under 60 seconds. You copy a single line of script code from your dashboard and paste it right before the closing &lt;/body&gt; tag in your Shopify <code>theme.liquid</code> file. No coding or complex app installation required.
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span>Can I cancel or change my plan anytime?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Yes, absolutely. There are no contracts, lock-ins, or hidden cancellation fees. You can cancel, downgrade, or upgrade your subscription with one click directly inside your Merchant Dashboard.
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span>Is our store data and customer chat private?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                100% private. We use isolated multi-tenant architecture with row-level encryption. Your customer chats and policy documents are never used to train global public AI models.
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span>What happens when my 14-day free pilot ends?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                You get 50 automated answers completely free for 14 days without entering a credit card. When your trial ends, you can choose to upgrade to our $79/mo Starter plan to keep your assistant live, or your assistant will automatically pause without charging you a cent.
+              </div>
             </div>
           </div>
         </div>
@@ -422,14 +392,21 @@
     <!-- Footer -->
     <footer>
       <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 24px;">
           <div style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
-            <span>🛡️ PolicyPilot.ai</span>
-            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">• The Zero-Hallucination AI Support Copilot</span>
+            <div class="logo-badge" style="width: 28px; height: 28px; font-size: 0.9rem;">🛡️</div>
+            <span>PolicyPilot<span style="color: var(--cyan)">.ai</span></span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">• Zero-Hallucination AI Support Copilot</span>
           </div>
-          <div>
-            &copy; 2026 PolicyPilot AI, Inc. Built on enterprise AI-native multi-tenant architecture.
+          <div style="display: flex; gap: 24px; font-size: 0.85rem; flex-wrap: wrap;">
+            <a href="javascript:void(0)" onclick="openLegalModal('terms')" style="color: var(--text-secondary); text-decoration: none;">Terms of Service</a>
+            <a href="javascript:void(0)" onclick="openLegalModal('privacy')" style="color: var(--text-secondary); text-decoration: none;">Privacy Policy</a>
+            <a href="javascript:void(0)" onclick="openLegalModal('refund')" style="color: var(--text-secondary); text-decoration: none;">Refund Policy</a>
+            <a href="javascript:void(0)" onclick="openContactModal('Footer')" style="color: var(--text-secondary); text-decoration: none;">Contact Support</a>
           </div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 20px;">
+          &copy; 2026 PolicyPilot AI, Inc. All rights reserved. Built on enterprise AI-native multi-tenant architecture with Stripe payment infrastructure.
         </div>
       </div>
     </footer>
@@ -470,12 +447,12 @@
       <div class="dash-metrics-grid">
         <div class="dash-metric-card">
           <div class="metric-card-top">
-            <span>PILOT USAGE CREDITS</span>
+            <span>MONTHLY USAGE CREDITS</span>
             <span>⚡ REAL-TIME</span>
           </div>
           <div class="metric-card-val" id="dash-credits-display">48 / 50</div>
           <div class="metric-card-sub" style="color: var(--cyan);">
-            <span>●</span> 2 automated answers resolved today
+            <span>●</span> Automated answers meter
           </div>
         </div>
 
@@ -528,7 +505,10 @@
           <span>🛍️</span> Shopify & Web Embed
         </button>
         <button class="dash-tab-btn" id="btn-tab-billing" onclick="switchDashTab('billing')">
-          <span>💳</span> Plans & Billing
+          <span>💳</span> Plans & Invoices
+        </button>
+        <button class="dash-tab-btn" id="btn-tab-settings" onclick="switchDashTab('settings')">
+          <span>⚙️</span> Store Settings & API
         </button>
       </div>
 
@@ -555,9 +535,7 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody id="ticket-table-body">
-                <!-- Dynamically populated -->
-              </tbody>
+              <tbody id="ticket-table-body"></tbody>
             </table>
           </div>
         </div>
@@ -566,18 +544,14 @@
       <!-- TAB 2: Knowledge Base & Policies Manager -->
       <div class="dash-panel" id="panel-policies">
         <div class="policies-manager-grid">
-          <!-- Active Policies List -->
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
               <h3 style="font-size: 1.15rem; font-weight: 700;">Active Policy Documents</h3>
               <span class="trust-shield">Auto-Indexed in Vector DB</span>
             </div>
-            <div id="active-policies-list-container">
-              <!-- Dynamically populated -->
-            </div>
+            <div id="active-policies-list-container"></div>
           </div>
 
-          <!-- Add New Policy Form -->
           <div class="embed-step-card" style="margin-bottom: 0;">
             <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Add New Policy Rule / FAQ</h3>
             <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">
@@ -591,7 +565,7 @@
                 </div>
                 <div>
                   <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Exact Policy Rule / Clause</label>
-                  <textarea id="new-policy-content" class="custom-input" style="width: 100%; margin-top: 4px;" rows="4" placeholder="e.g. All orders placed before December 20 qualify for guaranteed Christmas delivery via complimentary FedEx 2-Day Air..." required></textarea>
+                  <textarea id="new-policy-content" class="custom-input" style="width: 100%; margin-top: 4px;" rows="4" placeholder="e.g. All orders placed before December 20 qualify for guaranteed Christmas delivery..." required></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" id="btn-save-new-policy">
                   ➕ Index Into Store AI Brain
@@ -610,7 +584,7 @@
               <span>Merchant Test Console</span>
             </div>
             <p style="color: var(--text-secondary); font-size: 0.85rem;">
-              Test how PolicyPilot answers shopper inquiries based on your live store policies. It strictly enforces the rules you defined.
+              Test how PolicyPilot answers shopper inquiries based on your live store policies.
             </p>
             <div class="policy-box" style="margin-top: 10px;">
               <div class="policy-box-header">ACTIVE POLICIES COUNT</div>
@@ -638,7 +612,7 @@
               </div>
             </div>
             <div class="chat-input-bar">
-              <input type="text" id="dash-chat-input" placeholder="Test a customer question (e.g. 'What is our holiday return window?')..." onkeydown="handleDashChatKey(event)">
+              <input type="text" id="dash-chat-input" placeholder="Test a customer question..." onkeydown="handleDashChatKey(event)">
               <button class="btn btn-primary" onclick="sendDashChatMessage()">Ask AI ➔</button>
             </div>
           </div>
@@ -683,23 +657,23 @@
         </div>
       </div>
 
-      <!-- TAB 5: Plans & Billing -->
+      <!-- TAB 5: Plans & Invoices (Stripe Payment Gateway) -->
       <div class="dash-panel" id="panel-billing">
         <div class="embed-step-card">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
             <div>
               <div class="pill-tag" style="margin-bottom: 6px;">Active Subscription</div>
               <h3 style="font-size: 1.4rem; font-weight: 800;" id="billing-current-plan">14-Day Free Pilot</h3>
-              <p style="color: var(--text-secondary); font-size: 0.85rem;">Includes 50 automated answers and full policy verification.</p>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">Includes full policy verification and zero-hallucination guard.</p>
             </div>
             <div style="text-align: right;">
               <div style="font-size: 1.8rem; font-weight: 800; color: var(--emerald);" id="billing-credits-left">48 Left</div>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">of 50 pilot credits</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);" id="billing-credits-total">of 50 pilot credits</div>
             </div>
           </div>
 
-          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Upgrade Your Store's Plan</h4>
-          <div class="pricing-grid" style="margin-top: 0;">
+          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Available Subscription Upgrades</h4>
+          <div class="pricing-grid" style="margin-top: 0; margin-bottom: 32px;">
             <div class="pricing-card">
               <div class="plan-name">Starter Plan</div>
               <div class="plan-desc">For growing boutiques.</div>
@@ -709,7 +683,7 @@
                 <li><span>✓</span> Zero-hallucination guarantee</li>
                 <li><span>✓</span> Standard Shopify embed</li>
               </ul>
-              <button class="btn btn-secondary" onclick="upgradePlanTier('Starter', 79, 1000)">Upgrade to Starter</button>
+              <button class="btn btn-secondary" onclick="openStripeModal('Starter Plan', 79, 1000)">Pay with Stripe ($79/mo)</button>
             </div>
 
             <div class="pricing-card featured">
@@ -720,9 +694,71 @@
               <ul class="plan-features">
                 <li><span>✓</span> 4,000 automated answers / mo</li>
                 <li><span>✓</span> Human escalation routing</li>
-                <li><span>✓</span> Custom brand colors & styling</li>
+                <li><span>✓</span> Custom brand voice & color theming</li>
               </ul>
-              <button class="btn btn-primary" onclick="upgradePlanTier('Growth', 199, 4000)">Upgrade to Growth</button>
+              <button class="btn btn-primary" onclick="openStripeModal('Growth Store', 199, 4000)">Pay with Stripe ($199/mo)</button>
+            </div>
+          </div>
+
+          <!-- Billing Invoices History -->
+          <div style="border-top: 1px solid var(--border-subtle); padding-top: 24px;">
+            <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Billing & Invoice History (Stripe Receipts)</h4>
+            <div style="overflow-x: auto;">
+              <table class="invoices-list-table">
+                <thead>
+                  <tr>
+                    <th>Invoice ID</th>
+                    <th>Date</th>
+                    <th>Plan / Description</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Receipt</th>
+                  </tr>
+                </thead>
+                <tbody id="invoices-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: Store Settings & API Keys -->
+      <div class="dash-panel" id="panel-settings">
+        <div class="embed-step-card">
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 20px;">Store Configuration & API Access</h3>
+          
+          <div class="settings-grid">
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px;">AI Persona & Brand Voice</h4>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Support Tone</label>
+                  <select id="setting-agent-tone" class="custom-input" style="width: 100%; margin-top: 4px;" onchange="saveStoreSettings()">
+                    <option value="friendly">Warm, Helpful & Enthusiastic (Standard)</option>
+                    <option value="professional">Professional, Formal & Direct</option>
+                    <option value="casual">Casual, Streetwear & Modern</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Widget Primary Color</label>
+                  <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                    <input type="color" id="setting-widget-color" value="#6366f1" style="background: none; border: none; width: 42px; height: 38px; cursor: pointer;" onchange="saveStoreSettings()">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);" id="color-hex-display">#6366f1 (Indigo Cyan)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px;">Developer API Key</h4>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">Use this API key for headless storefronts or custom mobile apps.</p>
+              <div class="api-key-box">
+                <span id="display-api-key">pk_live_948194028472910</span>
+                <button class="btn btn-secondary btn-sm" onclick="copyApiKey()">Copy</button>
+              </div>
+              <button class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="regenerateApiKey()">
+                🔄 Regenerate API Key
+              </button>
             </div>
           </div>
         </div>
@@ -731,13 +767,61 @@
   </div>
 
   <!-- ==============================================
-       MODALS: PILOT SIGNUP & QUICK LOGIN
+       MODALS: STRIPE, ONBOARDING, LEGAL & CONTACT
   ============================================== -->
+
+  <!-- Stripe Checkout Modal -->
+  <div class="modal-overlay" id="stripe-modal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-content stripe-modal-content">
+      <button class="modal-close" onclick="closeStripeModal()">&times;</button>
+      
+      <div class="stripe-badge-bar">
+        <span class="stripe-powered-text">💳 Powered by <strong>Stripe</strong></span>
+        <span>🔒 256-Bit SSL Secured</span>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h3 style="font-size: 1.3rem; font-weight: 800;" id="stripe-checkout-title">Subscribe to Starter Plan</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
+          Billed monthly. Cancel anytime with one click in your dashboard.
+        </p>
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin: 12px 0;" id="stripe-checkout-price">$79.00 <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+      </div>
+
+      <form id="stripe-payment-form" onsubmit="handleStripePaymentSubmit(event)">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Email Address</label>
+            <input type="email" id="stripe-email" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="billing@yourstore.com">
+          </div>
+
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Payment Card Information</label>
+            <div class="card-input-box" style="margin-top: 4px;">
+              <div class="card-number-row">
+                <span style="font-size: 1.1rem;">💳</span>
+                <input type="text" id="stripe-card-num" class="card-input-clean" placeholder="4242 •••• •••• 4242" maxlength="19" required oninput="formatCardNumber(this)">
+              </div>
+              <div class="card-split-row">
+                <input type="text" id="stripe-card-exp" class="card-input-clean" placeholder="MM / YY" maxlength="5" required oninput="formatCardExpiry(this)">
+                <input type="text" id="stripe-card-cvc" class="card-input-clean" placeholder="CVC" maxlength="4" required>
+                <input type="text" id="stripe-card-zip" class="card-input-clean" placeholder="ZIP" required>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-stripe-pay" style="width: 100%; margin-top: 8px;">
+            🔒 Confirm & Activate Subscription ➔
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Pilot Signup Modal -->
   <div class="modal-overlay" id="pilot-modal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content">
-      <button class="modal-close" onclick="closePilotModal()" id="btn-modal-close">&times;</button>
+      <button class="modal-close" onclick="closePilotModal()">&times;</button>
       <div style="text-align: center; margin-bottom: 20px;">
         <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
         <h3 style="font-size: 1.4rem; font-weight: 800;">Get Your 14-Day Free Pilot</h3>
@@ -798,7 +882,67 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
+  <!-- Contact Support Modal -->
+  <div class="modal-overlay" id="contact-modal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeContactModal()">&times;</button>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="logo-badge" style="margin: 0 auto 12px;">💬</div>
+        <h3 style="font-size: 1.4rem; font-weight: 800;">Contact PolicyPilot Support</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
+          Our technical engineering team typically responds within 2 hours.
+        </p>
+      </div>
+      <form onsubmit="handleContactSubmit(event)">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Your Name</label>
+            <input type="text" id="contact-name" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="Jane Doe">
+          </div>
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Work Email</label>
+            <input type="email" id="contact-email" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="jane@store.com">
+          </div>
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Message / Request</label>
+            <textarea id="contact-msg" class="custom-input" rows="3" style="width: 100%; margin-top: 4px;" required placeholder="Tell us how we can assist your store..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message ➔</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Legal Policies Modal -->
+  <div class="modal-overlay" id="legal-modal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-content" style="max-width: 680px;">
+      <button class="modal-close" onclick="closeLegalModal()">&times;</button>
+      <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 12px;" id="legal-modal-title">Terms of Service</h3>
+      
+      <div class="legal-modal-body" id="legal-modal-content">
+        <!-- Rendered dynamically -->
+      </div>
+      
+      <button class="btn btn-secondary" onclick="closeLegalModal()" style="width: 100%; margin-top: 8px;">Close</button>
+    </div>
+  </div>
+
+  <!-- GDPR Cookie Consent Banner -->
+  <div class="cookie-banner" id="cookie-banner" style="display: none;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span>🍪</span>
+      <h4 style="font-size: 0.95rem; font-weight: 700;">We Respect Your Privacy</h4>
+    </div>
+    <div class="cookie-text">
+      PolicyPilot uses strictly necessary cookies and anonymous telemetry to ensure safe session isolation and reliable AI search. Your customer data is never sold or used for model training.
+    </div>
+    <div class="cookie-actions">
+      <button class="btn btn-primary btn-sm" onclick="acceptCookies()">Accept All</button>
+      <button class="btn btn-secondary btn-sm" onclick="dismissCookies()">Essential Only</button>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
   <div class="toast" id="global-toast">
     <span id="toast-icon">✅</span>
     <span id="toast-msg">Notification message</span>

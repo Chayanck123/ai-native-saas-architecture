@@ -1,6 +1,6 @@
-// PolicyPilot AI - Full End-to-End Platform Engine
+// PolicyPilot AI - Complete End-to-End Platform Engine
 
-// Preset Store Data for Landing Sandbox
+// Preset Store Profiles for Landing Sandbox
 const storeProfiles = {
   aerokicks: {
     id: "aerokicks",
@@ -138,11 +138,11 @@ Due to FAA safety regulations, loose lithium battery packs cannot be returned vi
 
 let currentStoreKey = "aerokicks";
 let isTyping = false;
+let pendingStripePlan = null;
 
 // Active Merchant Session State
 let activeMerchant = null;
 
-// Default initial tickets for newly activated stores
 const sampleTickets = [
   {
     time: "2 mins ago",
@@ -170,12 +170,42 @@ const sampleTickets = [
   }
 ];
 
+const sampleInvoices = [
+  {
+    id: "in_1N9qX82eZvKYlo2CL",
+    date: "Sep 28, 2026",
+    plan: "14-Day Free Pilot Activation",
+    amount: "$0.00",
+    status: "PAID"
+  }
+];
+
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   renderStore(currentStoreKey);
   updateCalculator();
   checkExistingSession();
+  initCookieBanner();
 });
+
+// Cookie Consent
+function initCookieBanner() {
+  const accepted = localStorage.getItem("policypilot_cookies_accepted");
+  if (!accepted) {
+    setTimeout(() => {
+      document.getElementById("cookie-banner").style.display = "flex";
+    }, 1200);
+  }
+}
+function acceptCookies() {
+  localStorage.setItem("policypilot_cookies_accepted", "all");
+  document.getElementById("cookie-banner").style.display = "none";
+  showToast("Preferences saved. Thank you!", "info");
+}
+function dismissCookies() {
+  localStorage.setItem("policypilot_cookies_accepted", "essential");
+  document.getElementById("cookie-banner").style.display = "none";
+}
 
 // View Switching: Landing vs Dashboard
 function switchView(viewName) {
@@ -218,6 +248,7 @@ function checkExistingSession() {
   if (saved) {
     try {
       activeMerchant = JSON.parse(saved);
+      if (!activeMerchant.invoices) activeMerchant.invoices = [...sampleInvoices];
       document.getElementById("nav-guest-actions").style.display = "none";
       document.getElementById("nav-user-actions").style.display = "flex";
       document.getElementById("nav-store-badge").textContent = `🛍️ ${activeMerchant.storeName}`;
@@ -243,6 +274,9 @@ function handlePilotSubmit(e) {
     totalCredits: 50,
     ticketsResolved: 14,
     costSaved: 70.00,
+    apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
+    tone: "friendly",
+    widgetColor: "#6366f1",
     policies: [
       {
         id: "p1",
@@ -260,7 +294,8 @@ function handlePilotSubmit(e) {
         content: "Items purchased from clearance racks or marked as final sale are strictly non-refundable."
       }
     ],
-    tickets: [...sampleTickets]
+    tickets: [...sampleTickets],
+    invoices: [...sampleInvoices]
   };
 
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
@@ -284,6 +319,9 @@ function quickLoginDemoStore() {
     totalCredits: 50,
     ticketsResolved: 14,
     costSaved: 70.00,
+    apiKey: "pk_live_aerokicks_948271049281",
+    tone: "casual",
+    widgetColor: "#6366f1",
     policies: [
       {
         id: "p1",
@@ -296,7 +334,8 @@ function quickLoginDemoStore() {
         content: "A flat $7.00 return label fee is deducted from returns. Size exchanges are 100% free."
       }
     ],
-    tickets: [...sampleTickets]
+    tickets: [...sampleTickets],
+    invoices: [...sampleInvoices]
   };
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
   showToast("⚡ Logged in as AeroKicks Apparel!", "success");
@@ -316,6 +355,9 @@ function handleLoginSubmit(e) {
     totalCredits: 50,
     ticketsResolved: 8,
     costSaved: 40.00,
+    apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
+    tone: "professional",
+    widgetColor: "#6366f1",
     policies: [
       {
         id: "p1",
@@ -323,7 +365,8 @@ function handleLoginSubmit(e) {
         content: "Returns accepted within 14 days of purchase in original packaging."
       }
     ],
-    tickets: [...sampleTickets]
+    tickets: [...sampleTickets],
+    invoices: [...sampleInvoices]
   };
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
   closeLoginModal();
@@ -342,20 +385,30 @@ function logoutMerchant() {
 function renderDashboard() {
   if (!activeMerchant) return;
 
-  // Header display
   document.getElementById("dash-store-name-display").textContent = activeMerchant.storeName;
   document.getElementById("dash-store-url-display").textContent = `${activeMerchant.storeUrl} • Policy AI Engine Connected`;
   document.getElementById("dash-plan-badge").textContent = activeMerchant.plan;
   document.getElementById("nav-store-badge").textContent = `🛍️ ${activeMerchant.storeName}`;
 
-  // Metrics
   document.getElementById("dash-credits-display").textContent = `${activeMerchant.creditsLeft} / ${activeMerchant.totalCredits}`;
   document.getElementById("dash-tickets-resolved-display").textContent = activeMerchant.ticketsResolved;
   document.getElementById("dash-cost-saved-display").textContent = `$${activeMerchant.costSaved.toFixed(2)}`;
 
-  // Billing tab displays
   document.getElementById("billing-current-plan").textContent = activeMerchant.plan;
   document.getElementById("billing-credits-left").textContent = `${activeMerchant.creditsLeft} Left`;
+  document.getElementById("billing-credits-total").textContent = `of ${activeMerchant.totalCredits.toLocaleString()} total credits`;
+
+  // Settings
+  if (activeMerchant.apiKey) {
+    document.getElementById("display-api-key").textContent = activeMerchant.apiKey;
+  }
+  if (activeMerchant.tone) {
+    document.getElementById("setting-agent-tone").value = activeMerchant.tone;
+  }
+  if (activeMerchant.widgetColor) {
+    document.getElementById("setting-widget-color").value = activeMerchant.widgetColor;
+    document.getElementById("color-hex-display").textContent = `${activeMerchant.widgetColor}`;
+  }
 
   // Embed snippet tailored
   const slug = activeMerchant.storeName.toLowerCase().replace(/[^a-z0-9]/g, "-");
@@ -367,11 +420,9 @@ function renderDashboard() {
   async>
 </script>`;
 
-  // Render Tickets Table
   renderTicketTable();
-
-  // Render Policies List
   renderPoliciesList();
+  renderInvoicesTable();
 }
 
 function renderTicketTable() {
@@ -397,7 +448,7 @@ function renderPoliciesList() {
   if (!container || !activeMerchant) return;
   container.innerHTML = "";
 
-  activeMerchant.policies.forEach((p, idx) => {
+  activeMerchant.policies.forEach(p => {
     const card = document.createElement("div");
     card.className = "policy-rule-card";
     card.innerHTML = `
@@ -417,6 +468,26 @@ function renderPoliciesList() {
   if (countElem) {
     countElem.textContent = `${activeMerchant.policies.length} Rules Active`;
   }
+}
+
+function renderInvoicesTable() {
+  const tbody = document.getElementById("invoices-table-body");
+  if (!tbody || !activeMerchant) return;
+  tbody.innerHTML = "";
+
+  const invoices = activeMerchant.invoices || sampleInvoices;
+  invoices.forEach(inv => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-primary);">${escapeHtml(inv.id)}</td>
+      <td>${escapeHtml(inv.date)}</td>
+      <td style="font-weight: 600;">${escapeHtml(inv.plan)}</td>
+      <td style="font-family: var(--font-mono); color: var(--emerald); font-weight: 700;">${escapeHtml(inv.amount)}</td>
+      <td><span class="ticket-status-pill status-resolved">✓ ${escapeHtml(inv.status)}</span></td>
+      <td><button class="btn-invoice-download" onclick="downloadInvoiceReceipt('${inv.id}', '${inv.plan}', '${inv.amount}', '${inv.date}')">📄 Download PDF</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 // Add New Policy in Dashboard
@@ -452,7 +523,7 @@ function deletePolicyRule(id) {
 function triggerSimulatedTicket() {
   if (!activeMerchant) return;
   if (activeMerchant.creditsLeft <= 0) {
-    showToast("⚠️ Out of pilot credits! Please upgrade your plan.", "warning");
+    showToast("⚠️ Out of credits! Please upgrade your plan.", "warning");
     switchDashTab("billing");
     return;
   }
@@ -499,7 +570,7 @@ function triggerSimulatedTicket() {
 
   renderDashboard();
   switchDashTab("tickets");
-  showToast(`🔔 New customer ticket auto-resolved: "${pick.query.substring(0, 35)}..."`, "success");
+  showToast(`🔔 Customer ticket auto-resolved: "${pick.query.substring(0, 35)}..."`, "success");
 }
 
 // Dashboard Tabs Switcher
@@ -526,7 +597,6 @@ function sendDashChatMessage() {
 
   const container = document.getElementById("dash-chat-messages-container");
   
-  // User bubble
   const userDiv = document.createElement("div");
   userDiv.className = "message user";
   userDiv.innerHTML = `<div class="msg-bubble">${escapeHtml(query)}</div>`;
@@ -534,12 +604,10 @@ function sendDashChatMessage() {
   input.value = "";
   container.scrollTop = container.scrollHeight;
 
-  // Agent answer with live policy lookup
   setTimeout(() => {
     let answerText = "Based strictly on your active store policies, requests are verified with zero hallucinations. Ineligible or custom requests are escalated directly to staff.";
     let citationText = "Active Store Policy";
 
-    // Match against user added policies
     const found = activeMerchant.policies.find(p => 
       query.toLowerCase().includes(p.title.toLowerCase()) || 
       p.content.toLowerCase().split(" ").some(w => w.length > 4 && query.toLowerCase().includes(w))
@@ -573,7 +641,6 @@ function resetDashChat() {
   `;
 }
 
-// Copy Dashboard Embed Code
 function copyDashEmbedCode() {
   const code = document.getElementById("dash-embed-snippet").textContent;
   navigator.clipboard.writeText(code).then(() => {
@@ -581,7 +648,6 @@ function copyDashEmbedCode() {
   });
 }
 
-// Launch Live Floating Widget On-Screen
 function launchLiveFloatingWidget() {
   if (window.PolicyPilotWidgetLoaded) {
     showToast("🛡️ Floating widget is already active in bottom right corner!", "info");
@@ -594,18 +660,214 @@ function launchLiveFloatingWidget() {
   showToast("🚀 Floating widget launched in the bottom right corner!", "success");
 }
 
-// Plan Upgrade
-function upgradePlanTier(tierName, price, credits) {
-  if (!activeMerchant) return;
-  activeMerchant.plan = `${tierName} Plan ($${price}/mo)`;
-  activeMerchant.creditsLeft += credits;
-  activeMerchant.totalCredits += credits;
-  localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
-  renderDashboard();
-  showToast(`🎉 Upgraded to ${tierName} Plan! ${credits.toLocaleString()} credits added!`, "success");
+// Stripe Payment Integration
+function openStripeModal(planName, price, credits) {
+  pendingStripePlan = { planName, price, credits };
+  document.getElementById("stripe-checkout-title").textContent = `Subscribe to ${planName}`;
+  document.getElementById("stripe-checkout-price").innerHTML = `$${price}.00 <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span>`;
+  document.getElementById("stripe-modal").style.display = "flex";
 }
 
-// Store Switching for Landing Page Sandbox
+function closeStripeModal() {
+  document.getElementById("stripe-modal").style.display = "none";
+}
+
+function handleStripePaymentSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn-stripe-pay");
+  btn.innerHTML = `<span class="pulse-dot"></span> Processing 256-Bit Stripe Payment...`;
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.innerHTML = `🔒 Confirm & Activate Subscription ➔`;
+    btn.disabled = false;
+    closeStripeModal();
+
+    if (!activeMerchant) {
+      quickLoginDemoStore();
+    }
+
+    const plan = pendingStripePlan || { planName: "Starter Plan", price: 79, credits: 1000 };
+    activeMerchant.plan = `${plan.planName} ($${plan.price}/mo)`;
+    activeMerchant.creditsLeft += plan.credits;
+    activeMerchant.totalCredits += plan.credits;
+
+    // Create Invoice Receipt
+    const newInvoice = {
+      id: "in_stripe_" + Math.random().toString(36).substring(2, 9).toUpperCase(),
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      plan: `${plan.planName} Monthly Subscription`,
+      amount: `$${plan.price}.00`,
+      status: "PAID"
+    };
+    if (!activeMerchant.invoices) activeMerchant.invoices = [];
+    activeMerchant.invoices.unshift(newInvoice);
+
+    localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+    renderDashboard();
+    switchView("dashboard");
+    switchDashTab("billing");
+
+    showToast(`🎉 Payment approved! Your ${plan.planName} is active with ${plan.credits.toLocaleString()} credits!`, "success");
+  }, 1200);
+}
+
+function formatCardNumber(input) {
+  let val = input.value.replace(/\D/g, "");
+  let formatted = "";
+  for (let i = 0; i < val.length; i++) {
+    if (i > 0 && i % 4 === 0) formatted += " ";
+    formatted += val[i];
+  }
+  input.value = formatted.substring(0, 19);
+}
+
+function formatCardExpiry(input) {
+  let val = input.value.replace(/\D/g, "");
+  if (val.length >= 2) {
+    input.value = val.substring(0, 2) + " / " + val.substring(2, 4);
+  } else {
+    input.value = val;
+  }
+}
+
+function downloadInvoiceReceipt(id, plan, amount, date) {
+  const receiptWindow = window.open("", "_blank");
+  receiptWindow.document.write(`
+    <html>
+      <head>
+        <title>Receipt - ${id}</title>
+        <style>
+          body { font-family: -apple-system, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+          .receipt-box { max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 32px; }
+          .header { display: flex; justify-content: space-between; border-bottom: 2px solid #6366f1; padding-bottom: 16px; margin-bottom: 24px; }
+          .status { display: inline-block; padding: 4px 12px; background: #ecfdf5; color: #059669; border-radius: 9999px; font-weight: 700; font-size: 14px; }
+          .amount { font-size: 28px; font-weight: 800; color: #4338ca; }
+        </style>
+      </head>
+      <body>
+        <div class="receipt-box">
+          <div class="header">
+            <div>
+              <h2>🛡️ PolicyPilot.ai</h2>
+              <div>Invoice #${id}</div>
+              <div>Date: ${date}</div>
+            </div>
+            <div style="text-align: right;">
+              <span class="status">PAID</span>
+              <div class="amount" style="margin-top: 8px;">${amount}</div>
+            </div>
+          </div>
+          <p><strong>Billed To:</strong> ${activeMerchant ? activeMerchant.storeName : "Store Partner"} (${activeMerchant ? activeMerchant.email : "billing@store.com"})</p>
+          <p><strong>Item:</strong> ${plan}</p>
+          <p><strong>Payment Method:</strong> Visa ending in 4242 (Stripe Secure Charge)</p>
+          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="font-size: 12px; color: #64748b;">PolicyPilot AI, Inc. • Enterprise Subscription Infrastructure</p>
+        </div>
+      </body>
+    </html>
+  `);
+  receiptWindow.document.close();
+}
+
+// Store Settings
+function saveStoreSettings() {
+  if (!activeMerchant) return;
+  activeMerchant.tone = document.getElementById("setting-agent-tone").value;
+  activeMerchant.widgetColor = document.getElementById("setting-widget-color").value;
+  document.getElementById("color-hex-display").textContent = activeMerchant.widgetColor;
+  localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+  showToast("Store settings saved.", "info");
+}
+
+function copyApiKey() {
+  const key = document.getElementById("display-api-key").textContent;
+  navigator.clipboard.writeText(key).then(() => {
+    showToast("API Key copied to clipboard!", "success");
+  });
+}
+
+function regenerateApiKey() {
+  if (!activeMerchant) return;
+  activeMerchant.apiKey = "pk_live_" + Math.random().toString(36).substring(2, 14);
+  document.getElementById("display-api-key").textContent = activeMerchant.apiKey;
+  localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+  showToast("New API key generated.", "success");
+}
+
+// FAQ Accordion
+function toggleFaq(item) {
+  const isOpen = item.classList.contains("open");
+  document.querySelectorAll(".faq-item").forEach(f => f.classList.remove("open"));
+  if (!isOpen) item.classList.add("open");
+}
+
+// Legal Modals Content
+const legalTexts = {
+  terms: {
+    title: "Terms of Service",
+    content: `
+      <h4>1. Acceptance of Terms</h4>
+      <p>By subscribing to or using PolicyPilot AI, you agree to these Terms of Service. PolicyPilot provides automated policy assistance software for e-commerce platforms.</p>
+      <h4>2. Accuracy & Dual-Engine Verification</h4>
+      <p>PolicyPilot verifies generated answers against merchant-provided policy documentation using an internal critic. While our zero-hallucination guard minimizes errors, merchants remain responsible for maintaining accurate and lawful store policies.</p>
+      <h4>3. Subscription & Billing</h4>
+      <p>Subscriptions renew automatically each month via Stripe. You may cancel your subscription at any time with one click in your Merchant Dashboard before the start of the next billing cycle.</p>
+      <h4>4. Limitation of Liability</h4>
+      <p>In no event shall PolicyPilot AI be liable for indirect, punitive, or consequential damages resulting from store returns or customer communications.</p>
+    `
+  },
+  privacy: {
+    title: "Privacy Policy (GDPR & CCPA Compliant)",
+    content: `
+      <h4>1. Data We Collect</h4>
+      <p>We collect store URLs, merchant emails, uploaded policy documents, and customer support chat transcripts strictly to provide our retrieval-augmented support services.</p>
+      <h4>2. Zero Model Training on Customer Data</h4>
+      <p>Your store documents and customer chat logs are never used to train global public AI models. We maintain complete tenant isolation with row-level encryption.</p>
+      <h4>3. Data Retention & Deletion</h4>
+      <p>Merchants may request full deletion of their store data, embeddings, and chat history at any time by contacting privacy@policypilot.ai or through the settings portal.</p>
+      <h4>4. Security</h4>
+      <p>All network traffic is encrypted via TLS 1.3. Payment card data is processed exclusively through Stripe and never touches our application servers.</p>
+    `
+  },
+  refund: {
+    title: "Refund & Cancellation Policy",
+    content: `
+      <h4>1. 14-Day Risk-Free Trial</h4>
+      <p>Every store begins with a 14-day free pilot (50 automated answers) requiring zero credit card upfront.</p>
+      <h4>2. 14-Day Money-Back Guarantee</h4>
+      <p>If you upgrade to any paid tier (Starter or Growth) and PolicyPilot does not automate at least 40% of your repetitive tickets with 100% policy accuracy, contact us within 14 days for a full, unconditional refund.</p>
+      <h4>3. Hassle-Free Cancellation</h4>
+      <p>Cancel anytime from your dashboard. Upon cancellation, your service remains active through the end of your current paid billing period with no further charges.</p>
+    `
+  }
+};
+
+function openLegalModal(type) {
+  const policy = legalTexts[type] || legalTexts.terms;
+  document.getElementById("legal-modal-title").textContent = policy.title;
+  document.getElementById("legal-modal-content").innerHTML = policy.content;
+  document.getElementById("legal-modal").style.display = "flex";
+}
+function closeLegalModal() {
+  document.getElementById("legal-modal").style.display = "none";
+}
+
+// Contact Support Modal
+function openContactModal(context = "") {
+  document.getElementById("contact-modal").style.display = "flex";
+}
+function closeContactModal() {
+  document.getElementById("contact-modal").style.display = "none";
+}
+function handleContactSubmit(e) {
+  e.preventDefault();
+  closeContactModal();
+  showToast("💬 Message sent! An engineer will reply within 2 hours.", "success");
+  e.target.reset();
+}
+
+// Landing Store Switcher
 function switchStore(storeKey) {
   currentStoreKey = storeKey;
   document.querySelectorAll(".store-tab-btn").forEach(btn => btn.classList.remove("active"));
@@ -857,7 +1119,7 @@ function copyEmbedCode() {
   });
 }
 
-// Modals
+// Modal Triggers
 function openPilotModal(source = "") {
   document.getElementById("pilot-modal").style.display = "flex";
 }
@@ -873,6 +1135,9 @@ function closeLoginModal() {
 function closeModalOnBackdrop(e) {
   if (e.target.id === "pilot-modal") closePilotModal();
   if (e.target.id === "login-modal") closeLoginModal();
+  if (e.target.id === "stripe-modal") closeStripeModal();
+  if (e.target.id === "contact-modal") closeContactModal();
+  if (e.target.id === "legal-modal") closeLegalModal();
 }
 
 function showToast(message, type = "success") {
