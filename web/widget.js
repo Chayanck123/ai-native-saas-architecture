@@ -151,32 +151,69 @@
       cursor: pointer;
       font-weight: 600;
     }
+    .pp-whatsapp-bar {
+      padding: 8px 12px;
+      background: rgba(37, 211, 102, 0.1);
+      border-top: 1px solid rgba(37, 211, 102, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #86efac;
+    }
+    .pp-whatsapp-link {
+      background: #25d366;
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
   `;
   document.head.appendChild(style);
+
+  // Retrieve stored merchant settings if available
+  let merchant = null;
+  try {
+    const raw = localStorage.getItem("policypilot_active_merchant");
+    if (raw) merchant = JSON.parse(raw);
+  } catch (e) {}
+
+  const displayName = merchant ? merchant.storeName : (storeId !== 'demo-store' ? storeId : 'Store');
+  const whatsappNum = (merchant && merchant.whatsapp) ? merchant.whatsapp.replace(/[^0-9]/g, "") : "919876543210";
 
   // Create Widget DOM
   const btn = document.createElement('div');
   btn.className = 'pp-widget-btn';
   btn.innerHTML = '<span class="pp-widget-icon">🛡️</span>';
-  btn.title = "Ask Store Policy Assistant";
+  btn.title = `Ask ${displayName} Assistant`;
 
   const win = document.createElement('div');
   win.className = 'pp-chat-window';
   win.innerHTML = `
     <div class="pp-chat-header">
       <div class="pp-chat-title">
-        <span>Store Assistant</span>
+        <span>${displayName} Assistant</span>
         <span class="pp-chat-badge">Policy Guarded</span>
       </div>
       <button class="pp-close-btn" id="pp-btn-close">&times;</button>
     </div>
     <div class="pp-chat-body" id="pp-msg-stream">
       <div class="pp-msg agent">
-        Hi! How can I help you today? Ask about our return windows, shipping, or warranty policies.
+        Hello! I'm the automated policy copilot for <strong>${displayName}</strong>. Ask me anything about our return windows, reverse pickups, sizing, or exchange terms.
       </div>
     </div>
+    <div class="pp-whatsapp-bar">
+      <span>Need human escalation?</span>
+      <a href="https://wa.me/${whatsappNum}?text=Hi,%20I%20have%20a%20question%20about%20my%20order" target="_blank" class="pp-whatsapp-link">
+        💬 WhatsApp Store
+      </a>
+    </div>
     <div class="pp-chat-footer">
-      <input type="text" class="pp-chat-input" id="pp-user-query" placeholder="Ask a question..." />
+      <input type="text" class="pp-chat-input" id="pp-user-query" placeholder="Ask about returns, exchange, delivery..." />
       <button class="pp-send-btn" id="pp-btn-send">Send</button>
     </div>
   `;
@@ -208,14 +245,30 @@
     userMsg.textContent = query;
     stream.appendChild(userMsg);
     input.value = '';
+    stream.scrollTop = stream.scrollHeight;
 
     // Agent answer simulation
     setTimeout(() => {
+      let answer = "According to our active policy, items in original condition may be returned within our documented window. Reverse courier pickup is scheduled across serviceable pincodes.";
+      let citation = "Section 1: General Store Return Policy";
+
+      const q = query.toLowerCase();
+      if (q.includes("outside") || q.includes("worn") || q.includes("scuff")) {
+        answer = "Items must remain in brand new, unworn condition with tags attached to be eligible for return or exchange.";
+        citation = "Section 2: Item Condition & Eligibility";
+      } else if (q.includes("courier") || q.includes("reverse") || q.includes("pickup") || q.includes("fee")) {
+        answer = "Reverse pickup is scheduled via our courier partners (Shiprocket/BlueDart). A nominal pickup fee may apply for non-defective returns.";
+        citation = "Section 3: Reverse Logistics";
+      } else if (q.includes("money") || q.includes("free") || q.includes("cheat")) {
+        answer = "I cannot grant refunds outside our official policy terms. Please tap the WhatsApp button below to speak directly with customer operations.";
+        citation = "Policy Escalation Rule #14";
+      }
+
       const agentMsg = document.createElement('div');
       agentMsg.className = 'pp-msg agent';
       agentMsg.innerHTML = `
-        Thank you for asking. According to store policy, eligible items can be returned within 30 days of delivery in original condition.
-        <div class="pp-citation">📑 Cited from: Section 2: Returns & Refunds</div>
+        ${answer}
+        <div class="pp-citation">📑 Cited from: ${citation}</div>
       `;
       stream.appendChild(agentMsg);
       stream.scrollTop = stream.scrollHeight;

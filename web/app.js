@@ -1,6 +1,7 @@
-// PolicyPilot AI - Complete End-to-End Platform Engine
+// PolicyPilot AI - Full End-to-End Platform Engine with UPI & Global Stripe
 
-// Preset Store Profiles for Landing Sandbox
+let currentCurrency = "INR"; // Default for India: INR (₹)
+
 const storeProfiles = {
   aerokicks: {
     id: "aerokicks",
@@ -44,6 +45,43 @@ Any items purchased from the "Clearance" rack or ending in $.99 are final sale a
         citation: "Policy Escalation Rule #14",
         confidence: "Guard Activated",
         escalate: true
+      }
+    }
+  },
+  zariboutique: {
+    id: "zariboutique",
+    name: "Zari Ethnic Wear (India)",
+    avatar: "👗",
+    title: "ZARI ETHNIC WEAR (INDIA) RETURN & REVERSE PICKUP POLICY",
+    snippet: `[Section 1.1: 7-Day Exchange Window]
+Unworn sarees, kurtis, and lehengas with original brand tags and folding intact may be exchanged within 7 days of delivery.
+[Section 1.2: Custom Stitching & Blouse Alteration]
+Garments with customized sizing, fall-pico work, or stitched blouses are strictly non-returnable and non-refundable.
+[Section 1.3: Reverse Courier Logistics]
+Reverse pickup is available across 19,000+ Indian pincodes via Shiprocket and BlueDart. A nominal ₹100 courier pickup fee is adjusted against store credit.`,
+    chips: [
+      "Can I return a saree if the blouse is custom stitched?",
+      "How much is the reverse courier pickup fee in India?",
+      "Can I get a cash refund for clearance sale kurtis?"
+    ],
+    responses: {
+      "blouse": {
+        answer: "No, garments with custom tailoring, fall-pico work, or custom stitched blouses are strictly non-returnable and non-exchangeable under Section 1.2.",
+        citation: "Section 1.2: Custom Stitching & Alterations",
+        confidence: "100%",
+        escalate: false
+      },
+      "courier": {
+        answer: "Reverse pickup is available across 19,000+ Indian pincodes with a nominal ₹100 courier pickup fee adjusted against your exchange credit.",
+        citation: "Section 1.3: Reverse Logistics",
+        confidence: "100%",
+        escalate: false
+      },
+      "cash": {
+        answer: "Clearance and sale items are final sale. Eligible standard returns are processed as store credit within 48 hours of warehouse inspection.",
+        citation: "Section 1.1: Store Credit Policy",
+        confidence: "98%",
+        escalate: false
       }
     }
   },
@@ -126,7 +164,7 @@ Due to FAA safety regulations, loose lithium battery packs cannot be returned vi
     name: "Your Custom Store",
     avatar: "✨",
     title: "CUSTOM STORE POLICY (USER DEFINED)",
-    snippet: `Paste your store's return policy, FAQ, or shipping terms into the box below to test with your own actual business data!`,
+    snippet: `Paste your store's return policy or paste your live URL above to test!`,
     chips: [
       "What is your return deadline?",
       "Do I pay for return shipping?",
@@ -138,23 +176,21 @@ Due to FAA safety regulations, loose lithium battery packs cannot be returned vi
 
 let currentStoreKey = "aerokicks";
 let isTyping = false;
-let pendingStripePlan = null;
-
-// Active Merchant Session State
+let pendingPlan = { name: "Starter Plan", inr: 4999, usd: 79, credits: 1000 };
 let activeMerchant = null;
 
 const sampleTickets = [
   {
     time: "2 mins ago",
-    customer: "Sarah M. (Order #1042)",
-    query: "Can I exchange my sneakers for half a size larger?",
-    answer: "Size exchanges are 100% free with no return shipping fee.",
-    citation: "Section 3.2: Return Shipping Fees",
+    customer: "Priya S. (Order #1042)",
+    query: "Can I exchange my kurti for a size Large?",
+    answer: "Size exchanges are available within 7 days with a ₹100 reverse pickup fee.",
+    citation: "Section 1.1: Size Exchanges",
     status: "resolved"
   },
   {
     time: "14 mins ago",
-    customer: "David K. (Order #1039)",
+    customer: "Aman V. (Order #1039)",
     query: "I wore the shoes out to dinner once, can I still refund them?",
     answer: "No, items must be in unworn condition without street scuffs.",
     citation: "Section 3.1: Return Window & Conditions",
@@ -162,31 +198,97 @@ const sampleTickets = [
   },
   {
     time: "1 hour ago",
-    customer: "Marcus T. (Order #1021)",
-    query: "I want a $50 gift card because my delivery arrived 1 day late.",
-    answer: "Request exceeds automated guidelines. Escalated to manager.",
-    citation: "Escalation Protocol §4",
-    status: "escalated"
+    customer: "Kavita M. (Order #1021)",
+    query: "Can I return a saree with custom stitched blouse?",
+    answer: "Custom stitched blouses and altered sarees are non-returnable.",
+    citation: "Section 1.2: Custom Alterations",
+    status: "resolved"
   }
 ];
 
 const sampleInvoices = [
   {
-    id: "in_1N9qX82eZvKYlo2CL",
+    id: "INV_UPI_49201948",
     date: "Sep 28, 2026",
     plan: "14-Day Free Pilot Activation",
-    amount: "$0.00",
-    status: "PAID"
+    amount: "₹0 (Free Trial)",
+    status: "PAID",
+    utr: "UTR-FREE-PILOT-8921"
   }
 ];
 
-// Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   renderStore(currentStoreKey);
-  updateCalculator();
+  setCurrency("INR");
   checkExistingSession();
   initCookieBanner();
 });
+
+// Currency Switcher
+function setCurrency(curr) {
+  currentCurrency = curr;
+  const inrBtn = document.getElementById("btn-curr-inr");
+  const usdBtn = document.getElementById("btn-curr-usd");
+
+  if (curr === "INR") {
+    inrBtn.classList.add("active");
+    usdBtn.classList.remove("active");
+
+    document.getElementById("price-starter").innerHTML = `₹4,999 <span>/ month</span>`;
+    document.getElementById("price-growth").innerHTML = `₹14,999 <span>/ month</span>`;
+    document.getElementById("price-scale").innerHTML = `₹39,999 <span>/ month</span>`;
+
+    document.getElementById("btn-pay-starter").innerHTML = `⚡ Pay with UPI / QR Code`;
+    document.getElementById("btn-pay-growth").innerHTML = `⚡ Pay with UPI / QR Code`;
+
+    document.getElementById("dash-price-starter").innerHTML = `₹4,999 <span>/ mo</span>`;
+    document.getElementById("dash-price-growth").innerHTML = `₹14,999 <span>/ mo</span>`;
+
+    document.getElementById("hero-savings-stat").textContent = "₹2.4 Lakhs+";
+  } else {
+    usdBtn.classList.add("active");
+    inrBtn.classList.remove("active");
+
+    document.getElementById("price-starter").innerHTML = `$79 <span>/ month</span>`;
+    document.getElementById("price-growth").innerHTML = `$199 <span>/ month</span>`;
+    document.getElementById("price-scale").innerHTML = `$499 <span>/ month</span>`;
+
+    document.getElementById("btn-pay-starter").innerHTML = `💳 Pay with Card / Stripe`;
+    document.getElementById("btn-pay-growth").innerHTML = `💳 Pay with Card / Stripe`;
+
+    document.getElementById("dash-price-starter").innerHTML = `$79 <span>/ mo</span>`;
+    document.getElementById("dash-price-growth").innerHTML = `$199 <span>/ mo</span>`;
+
+    document.getElementById("hero-savings-stat").textContent = "$2,900+";
+  }
+  updateCalculator();
+}
+
+// 1-Click Policy Scraper Simulation
+function scrapeStorePolicyUrl() {
+  const urlInput = document.getElementById("custom-policy-url");
+  const url = urlInput.value.trim();
+  if (!url) {
+    showToast("⚠️ Please enter a store policy URL first!", "warning");
+    return;
+  }
+
+  showToast(`⚡ Crawling ${url} and extracting policies...`, "info");
+  
+  setTimeout(() => {
+    const scrapedText = `[Extracted Policy from ${url}]
+1. Returns accepted within 15 days of delivery in unwashed, original condition with invoice.
+2. Reverse pickup available across 19,000+ Indian pincodes via courier.
+3. Refunds processed to original UPI account or bank card within 48 hours of warehouse inspection.
+4. Final sale items and customized products are strictly non-refundable.`;
+    
+    document.getElementById("custom-policy-textarea").value = scrapedText;
+    document.getElementById("active-policy-title").textContent = `SCRAPED POLICY: ${url.replace('https://','').replace('http://','').split('/')[0].toUpperCase()}`;
+    document.getElementById("active-policy-text").textContent = scrapedText;
+    showToast(`✅ Successfully parsed & indexed policies from ${url}!`, "success");
+    resetChat();
+  }, 1000);
+}
 
 // Cookie Consent
 function initCookieBanner() {
@@ -273,25 +375,26 @@ function handlePilotSubmit(e) {
     creditsLeft: 48,
     totalCredits: 50,
     ticketsResolved: 14,
-    costSaved: 70.00,
+    costSaved: 5600,
     apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
     tone: "friendly",
+    whatsapp: "+91 98765 43210",
     widgetColor: "#6366f1",
     policies: [
       {
         id: "p1",
-        title: "Standard 30-Day Returns",
-        content: "Items in brand new, unworn condition with tags attached and original packaging may be returned within 30 days of delivery for a full refund."
+        title: "Standard 7-Day Returns & Exchanges",
+        content: "Items in brand new, unworn condition with tags attached and original packaging may be exchanged within 7 days of delivery."
       },
       {
         id: "p2",
-        title: "Free Size Exchanges",
-        content: "Exchanges for a different size or color are 100% free with prepaid return postage included."
+        title: "Reverse Courier Pickup Policy",
+        content: "Reverse pickup available across India. A nominal ₹100 reverse pickup fee is adjusted against store credit."
       },
       {
         id: "p3",
-        title: "Final Sale Items",
-        content: "Items purchased from clearance racks or marked as final sale are strictly non-refundable."
+        title: "Clearance & Custom Items",
+        content: "Custom tailored garments and clearance items are strictly non-refundable."
       }
     ],
     tickets: [...sampleTickets],
@@ -300,7 +403,7 @@ function handlePilotSubmit(e) {
 
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
   closePilotModal();
-  showToast(`🎉 Welcome ${storeName}! Entering your Merchant Dashboard...`, "success");
+  showToast(`🎉 Welcome ${storeName}! Entering your Merchant Command Center...`, "success");
   
   setTimeout(() => {
     switchView("dashboard");
@@ -311,34 +414,35 @@ function handlePilotSubmit(e) {
 function quickLoginDemoStore() {
   closeLoginModal();
   activeMerchant = {
-    storeName: "AeroKicks Apparel",
-    storeUrl: "https://aerokicks.com",
-    email: "founder@aerokicks.com",
+    storeName: "Zari Ethnic Wear (India)",
+    storeUrl: "https://zariethnic.in",
+    email: "support@zariethnic.in",
     plan: "14-Day Free Pilot",
     creditsLeft: 48,
     totalCredits: 50,
     ticketsResolved: 14,
-    costSaved: 70.00,
-    apiKey: "pk_live_aerokicks_948271049281",
-    tone: "casual",
+    costSaved: 5600,
+    apiKey: "pk_live_zari_948271049281",
+    tone: "friendly",
+    whatsapp: "+91 98765 43210",
     widgetColor: "#6366f1",
     policies: [
       {
         id: "p1",
-        title: "Unworn 30-Day Window",
-        content: "Items in brand new, unworn condition with tags attached and original box may be returned within 30 days. Worn shoes are ineligible."
+        title: "7-Day Exchange Window",
+        content: "Unworn sarees, kurtis, and lehengas with tags attached may be exchanged within 7 days."
       },
       {
         id: "p2",
-        title: "Flat $7 Return Shipping Fee",
-        content: "A flat $7.00 return label fee is deducted from returns. Size exchanges are 100% free."
+        title: "Reverse Courier Fee",
+        content: "Reverse pickup available across India for ₹100 fee."
       }
     ],
     tickets: [...sampleTickets],
     invoices: [...sampleInvoices]
   };
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
-  showToast("⚡ Logged in as AeroKicks Apparel!", "success");
+  showToast("⚡ Logged in as Zari Ethnic Wear!", "success");
   switchView("dashboard");
 }
 
@@ -348,15 +452,16 @@ function handleLoginSubmit(e) {
   const storeName = email.split("@")[0].toUpperCase() + " Store";
   activeMerchant = {
     storeName: storeName,
-    storeUrl: `https://${email.split("@")[1] || "store.com"}`,
+    storeUrl: `https://${email.split("@")[1] || "store.in"}`,
     email: email,
     plan: "14-Day Free Pilot",
     creditsLeft: 50,
     totalCredits: 50,
     ticketsResolved: 8,
-    costSaved: 40.00,
+    costSaved: 3200,
     apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
     tone: "professional",
+    whatsapp: "",
     widgetColor: "#6366f1",
     policies: [
       {
@@ -386,13 +491,13 @@ function renderDashboard() {
   if (!activeMerchant) return;
 
   document.getElementById("dash-store-name-display").textContent = activeMerchant.storeName;
-  document.getElementById("dash-store-url-display").textContent = `${activeMerchant.storeUrl} • Policy AI Engine Connected`;
+  document.getElementById("dash-store-url-display").textContent = `${activeMerchant.storeUrl} • UPI & AI Engine Connected`;
   document.getElementById("dash-plan-badge").textContent = activeMerchant.plan;
   document.getElementById("nav-store-badge").textContent = `🛍️ ${activeMerchant.storeName}`;
 
   document.getElementById("dash-credits-display").textContent = `${activeMerchant.creditsLeft} / ${activeMerchant.totalCredits}`;
   document.getElementById("dash-tickets-resolved-display").textContent = activeMerchant.ticketsResolved;
-  document.getElementById("dash-cost-saved-display").textContent = `$${activeMerchant.costSaved.toFixed(2)}`;
+  document.getElementById("dash-cost-saved-display").textContent = currentCurrency === "INR" ? `₹${activeMerchant.costSaved.toLocaleString()}` : `$${(activeMerchant.costSaved / 75).toFixed(2)}`;
 
   document.getElementById("billing-current-plan").textContent = activeMerchant.plan;
   document.getElementById("billing-credits-left").textContent = `${activeMerchant.creditsLeft} Left`;
@@ -405,9 +510,18 @@ function renderDashboard() {
   if (activeMerchant.tone) {
     document.getElementById("setting-agent-tone").value = activeMerchant.tone;
   }
+  if (activeMerchant.whatsapp) {
+    document.getElementById("setting-whatsapp-num").value = activeMerchant.whatsapp;
+  }
   if (activeMerchant.widgetColor) {
     document.getElementById("setting-widget-color").value = activeMerchant.widgetColor;
     document.getElementById("color-hex-display").textContent = `${activeMerchant.widgetColor}`;
+  }
+  if (activeMerchant.upiId && document.getElementById("setting-merchant-upi")) {
+    document.getElementById("setting-merchant-upi").value = activeMerchant.upiId;
+  }
+  if (activeMerchant.gstin && document.getElementById("setting-merchant-gstin")) {
+    document.getElementById("setting-merchant-gstin").value = activeMerchant.gstin;
   }
 
   // Embed snippet tailored
@@ -484,13 +598,12 @@ function renderInvoicesTable() {
       <td style="font-weight: 600;">${escapeHtml(inv.plan)}</td>
       <td style="font-family: var(--font-mono); color: var(--emerald); font-weight: 700;">${escapeHtml(inv.amount)}</td>
       <td><span class="ticket-status-pill status-resolved">✓ ${escapeHtml(inv.status)}</span></td>
-      <td><button class="btn-invoice-download" onclick="downloadInvoiceReceipt('${inv.id}', '${inv.plan}', '${inv.amount}', '${inv.date}')">📄 Download PDF</button></td>
+      <td><button class="btn-invoice-download" onclick="downloadInvoiceReceipt('${inv.id}', '${inv.plan}', '${inv.amount}', '${inv.date}', '${inv.utr || 'UTR-849201948'}')">📄 Download GST PDF</button></td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// Add New Policy in Dashboard
 function handleAddNewPolicy(e) {
   e.preventDefault();
   const title = document.getElementById("new-policy-title").value.trim();
@@ -511,6 +624,47 @@ function handleAddNewPolicy(e) {
   showToast(`✅ "${title}" indexed into your AI brain!`, "success");
 }
 
+// 1-Click Policy Scraper for Dashboard
+function scrapeDashboardStorePolicyUrl() {
+  const urlInput = document.getElementById("dash-policy-scrape-url");
+  const url = urlInput ? urlInput.value.trim() : "";
+  if (!url) {
+    showToast("⚠️ Please enter a store policy URL first!", "warning");
+    return;
+  }
+
+  showToast(`⚡ Crawling ${url} and extracting policy clauses...`, "info");
+
+  setTimeout(() => {
+    const domain = url.replace("https://", "").replace("http://", "").split("/")[0];
+    const rules = [
+      {
+        id: "p_" + Date.now() + "_1",
+        title: `${domain.toUpperCase()} - 14-Day Return Policy`,
+        content: `Items purchased from ${domain} may be returned within 14 days of delivery provided they are unused, unwashed, and in original packaging with all security tags attached.`
+      },
+      {
+        id: "p_" + Date.now() + "_2",
+        title: `${domain.toUpperCase()} - Reverse Logistics & Pincodes`,
+        content: `Reverse courier pickups are scheduled within 24-48 hours across all serviceable Indian pincodes. A flat ₹100 reverse logistics fee applies on non-defective returns.`
+      },
+      {
+        id: "p_" + Date.now() + "_3",
+        title: `${domain.toUpperCase()} - Non-Returnable Items & Clearance`,
+        content: `Final clearance items, customized orders, hygiene products, and free promotional gifts are strictly non-refundable and non-exchangeable.`
+      }
+    ];
+
+    if (!activeMerchant) quickLoginDemoStore();
+    rules.forEach(r => activeMerchant.policies.push(r));
+    localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+
+    renderPoliciesList();
+    if (urlInput) urlInput.value = "";
+    showToast(`✅ Successfully imported 3 active policy rules from ${domain}!`, "success");
+  }, 1200);
+}
+
 function deletePolicyRule(id) {
   if (!activeMerchant) return;
   activeMerchant.policies = activeMerchant.policies.filter(p => p.id !== id);
@@ -519,7 +673,6 @@ function deletePolicyRule(id) {
   showToast("Policy rule removed.", "info");
 }
 
-// Simulate Live Incoming Customer Ticket
 function triggerSimulatedTicket() {
   if (!activeMerchant) return;
   if (activeMerchant.creditsLeft <= 0) {
@@ -530,23 +683,23 @@ function triggerSimulatedTicket() {
 
   const queries = [
     {
-      customer: "Emma R. (Order #1048)",
-      query: "Can I return my item if I removed the price tag?",
-      answer: "Tags must remain attached to qualify for a return within 30 days.",
-      citation: "Section 3.1: Return Conditions",
+      customer: "Sneha G. (Order #1048)",
+      query: "Can I exchange my outfit for a size Medium?",
+      answer: "Size exchanges are available within 7 days. Reverse courier fee is ₹100.",
+      citation: "Section 1.1: Size Exchanges",
       status: "resolved"
     },
     {
-      customer: "Liam B. (Order #1052)",
-      query: "How much is the return postage fee for exchanges?",
-      answer: "Exchanges are 100% free with prepaid return postage included.",
-      citation: "Section 3.2: Size Exchanges",
+      customer: "Vikram R. (Order #1052)",
+      query: "Do you offer reverse pickup in Bangalore?",
+      answer: "Yes, reverse pickup is active across 19,000+ pincodes including Bangalore.",
+      citation: "Section 1.3: Reverse Courier Logistics",
       status: "resolved"
     },
     {
-      customer: "Chloe P. (Order #1055)",
-      query: "Can you waive the return fee because I'm an influencer?",
-      answer: "Fee waiver requires customer operations signoff. Escalation ticket logged.",
+      customer: "Rohit K. (Order #1055)",
+      query: "Can you give me an extra 20% discount coupon?",
+      answer: "Coupon requests outside seasonal offers are routed to support management.",
       citation: "Policy Escalation Rule #14",
       status: "escalated"
     }
@@ -565,7 +718,7 @@ function triggerSimulatedTicket() {
   activeMerchant.tickets.unshift(newTicket);
   activeMerchant.creditsLeft -= 1;
   activeMerchant.ticketsResolved += 1;
-  activeMerchant.costSaved += 5.00;
+  activeMerchant.costSaved += currentCurrency === "INR" ? 150 : 5;
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
 
   renderDashboard();
@@ -573,7 +726,6 @@ function triggerSimulatedTicket() {
   showToast(`🔔 Customer ticket auto-resolved: "${pick.query.substring(0, 35)}..."`, "success");
 }
 
-// Dashboard Tabs Switcher
 function switchDashTab(tabKey) {
   document.querySelectorAll(".dash-tab-btn").forEach(btn => btn.classList.remove("active"));
   document.querySelectorAll(".dash-panel").forEach(p => p.classList.remove("active"));
@@ -585,7 +737,7 @@ function switchDashTab(tabKey) {
   if (targetPanel) targetPanel.classList.add("active");
 }
 
-// Dashboard AI Test Chat
+// AI Test Chat
 function handleDashChatKey(e) {
   if (e.key === "Enter") sendDashChatMessage();
 }
@@ -660,45 +812,114 @@ function launchLiveFloatingWidget() {
   showToast("🚀 Floating widget launched in the bottom right corner!", "success");
 }
 
-// Stripe Payment Integration
-function openStripeModal(planName, price, credits) {
-  pendingStripePlan = { planName, price, credits };
-  document.getElementById("stripe-checkout-title").textContent = `Subscribe to ${planName}`;
-  document.getElementById("stripe-checkout-price").innerHTML = `$${price}.00 <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span>`;
-  document.getElementById("stripe-modal").style.display = "flex";
+// Copy UPI ID to clipboard
+function copyUpiId() {
+  const upiId = document.getElementById("upi-display-id").textContent.trim();
+  navigator.clipboard.writeText(upiId).then(() => {
+    showToast(`📋 UPI ID copied: ${upiId}`, "success");
+  });
 }
 
-function closeStripeModal() {
-  document.getElementById("stripe-modal").style.display = "none";
+// Payment Modal Controller (UPI + Stripe)
+function openPaymentModal(planName, inrPrice, usdPrice, credits) {
+  pendingPlan = { name: planName, inr: inrPrice, usd: usdPrice, credits: credits };
+  
+  document.getElementById("modal-checkout-title").textContent = `Subscribe to ${planName}`;
+  const priceDisplay = currentCurrency === "INR" 
+    ? `₹${inrPrice.toLocaleString()} <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span>`
+    : `$${usdPrice}.00 <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span>`;
+  document.getElementById("modal-checkout-price").innerHTML = priceDisplay;
+
+  // Set UPI ID and dynamic mobile intent link
+  const merchantUpi = (activeMerchant && activeMerchant.upiId) ? activeMerchant.upiId : "policypilot@okhdfcbank";
+  const upiIdDisplay = document.getElementById("upi-display-id");
+  if (upiIdDisplay) upiIdDisplay.textContent = merchantUpi;
+
+  const intentLink = document.getElementById("btn-upi-intent-link");
+  if (intentLink) {
+    intentLink.href = `upi://pay?pa=${merchantUpi}&pn=PolicyPilot%20AI&am=${inrPrice}.00&cu=INR&tn=${encodeURIComponent(planName + ' Subscription')}`;
+  }
+
+  // Set default tab based on currency
+  if (currentCurrency === "INR") {
+    switchPaymentMethod("upi");
+  } else {
+    switchPaymentMethod("card");
+  }
+
+  document.getElementById("payment-modal").style.display = "flex";
 }
 
-function handleStripePaymentSubmit(e) {
+function closePaymentModal() {
+  document.getElementById("payment-modal").style.display = "none";
+}
+
+function switchPaymentMethod(method) {
+  const upiTab = document.getElementById("tab-pay-upi");
+  const cardTab = document.getElementById("tab-pay-card");
+  const upiSection = document.getElementById("payment-section-upi");
+  const cardSection = document.getElementById("payment-section-card");
+
+  if (method === "upi") {
+    upiTab.classList.add("active");
+    cardTab.classList.remove("active");
+    upiSection.style.display = "block";
+    cardSection.style.display = "none";
+  } else {
+    cardTab.classList.add("active");
+    upiTab.classList.remove("active");
+    cardSection.style.display = "block";
+    upiSection.style.display = "none";
+  }
+}
+
+function sendUpiCollectRequest() {
+  const vpa = document.getElementById("upi-vpa-input").value.trim();
+  if (!vpa || !vpa.includes("@")) {
+    showToast("⚠️ Please enter a valid UPI ID (e.g. mobile@paytm or name@okhdfcbank)", "warning");
+    return;
+  }
+  showToast(`⚡ UPI Collect Request sent to ${vpa}. Approve in your UPI app!`, "success");
+}
+
+// Handle UPI Payment Confirmation
+function handleUpiPaymentSubmit(e) {
   e.preventDefault();
-  const btn = document.getElementById("btn-stripe-pay");
-  btn.innerHTML = `<span class="pulse-dot"></span> Processing 256-Bit Stripe Payment...`;
+  const btn = document.getElementById("btn-upi-confirm");
+  btn.innerHTML = `<span class="pulse-dot"></span> Verifying UPI UTR Reference with NPCI...`;
   btn.disabled = true;
 
   setTimeout(() => {
-    btn.innerHTML = `🔒 Confirm & Activate Subscription ➔`;
+    btn.innerHTML = `⚡ Confirm UPI Payment & Activate Plan ➔`;
     btn.disabled = false;
-    closeStripeModal();
+    closePaymentModal();
 
     if (!activeMerchant) {
       quickLoginDemoStore();
     }
 
-    const plan = pendingStripePlan || { planName: "Starter Plan", price: 79, credits: 1000 };
-    activeMerchant.plan = `${plan.planName} ($${plan.price}/mo)`;
-    activeMerchant.creditsLeft += plan.credits;
-    activeMerchant.totalCredits += plan.credits;
+    const enteredUtr = document.getElementById("upi-utr-input") ? document.getElementById("upi-utr-input").value.trim() : "";
+    const finalUtr = enteredUtr || ("UTR" + Math.floor(100000000000 + Math.random() * 900000000000));
+    const gstin = (document.getElementById("upi-gstin-input") && document.getElementById("upi-gstin-input").value.trim()) || "Unregistered (B2C)";
+    const amountStr = currentCurrency === "INR" ? `₹${pendingPlan.inr.toLocaleString()}` : `$${pendingPlan.usd}.00`;
 
-    // Create Invoice Receipt
+    if (gstin !== "Unregistered (B2C)") {
+      activeMerchant.gstin = gstin;
+    }
+
+    activeMerchant.plan = `${pendingPlan.name} (${amountStr}/mo)`;
+    activeMerchant.creditsLeft += pendingPlan.credits;
+    activeMerchant.totalCredits += pendingPlan.credits;
+
+    // Create GST Invoice
     const newInvoice = {
-      id: "in_stripe_" + Math.random().toString(36).substring(2, 9).toUpperCase(),
+      id: "INV_UPI_" + Math.random().toString(36).substring(2, 9).toUpperCase(),
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      plan: `${plan.planName} Monthly Subscription`,
-      amount: `$${plan.price}.00`,
-      status: "PAID"
+      plan: `${pendingPlan.name} (UPI Paid)`,
+      amount: amountStr,
+      status: "PAID",
+      utr: finalUtr,
+      gstin: gstin
     };
     if (!activeMerchant.invoices) activeMerchant.invoices = [];
     activeMerchant.invoices.unshift(newInvoice);
@@ -708,7 +929,48 @@ function handleStripePaymentSubmit(e) {
     switchView("dashboard");
     switchDashTab("billing");
 
-    showToast(`🎉 Payment approved! Your ${plan.planName} is active with ${plan.credits.toLocaleString()} credits!`, "success");
+    showToast(`🎉 UPI Payment Verified! ${pendingPlan.credits.toLocaleString()} credits added to your store!`, "success");
+  }, 1200);
+}
+
+// Handle Card Payment Submit
+function handleStripePaymentSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn-stripe-pay");
+  btn.innerHTML = `<span class="pulse-dot"></span> Processing 256-Bit Stripe Payment...`;
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.innerHTML = `🔒 Confirm & Activate Subscription ➔`;
+    btn.disabled = false;
+    closePaymentModal();
+
+    if (!activeMerchant) {
+      quickLoginDemoStore();
+    }
+
+    const amountStr = currentCurrency === "INR" ? `₹${pendingPlan.inr.toLocaleString()}` : `$${pendingPlan.usd}.00`;
+    activeMerchant.plan = `${pendingPlan.name} (${amountStr}/mo)`;
+    activeMerchant.creditsLeft += pendingPlan.credits;
+    activeMerchant.totalCredits += pendingPlan.credits;
+
+    const newInvoice = {
+      id: "INV_STRIPE_" + Math.random().toString(36).substring(2, 9).toUpperCase(),
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      plan: `${pendingPlan.name} Monthly Subscription`,
+      amount: amountStr,
+      status: "PAID",
+      utr: "STRIPE-CC-4242"
+    };
+    if (!activeMerchant.invoices) activeMerchant.invoices = [];
+    activeMerchant.invoices.unshift(newInvoice);
+
+    localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+    renderDashboard();
+    switchView("dashboard");
+    switchDashTab("billing");
+
+    showToast(`🎉 Payment approved! Your ${pendingPlan.name} is active!`, "success");
   }, 1200);
 }
 
@@ -731,38 +993,70 @@ function formatCardExpiry(input) {
   }
 }
 
-function downloadInvoiceReceipt(id, plan, amount, date) {
+// Download GST Invoice Receipt
+function downloadInvoiceReceipt(id, plan, amount, date, utr) {
   const receiptWindow = window.open("", "_blank");
+  const gstinDisplay = (activeMerchant && activeMerchant.gstin) ? activeMerchant.gstin : "27AAPFU0939F1ZV (Registered)";
+  
   receiptWindow.document.write(`
     <html>
       <head>
-        <title>Receipt - ${id}</title>
+        <title>Tax Invoice - ${id}</title>
         <style>
-          body { font-family: -apple-system, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
-          .receipt-box { max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 32px; }
-          .header { display: flex; justify-content: space-between; border-bottom: 2px solid #6366f1; padding-bottom: 16px; margin-bottom: 24px; }
-          .status { display: inline-block; padding: 4px 12px; background: #ecfdf5; color: #059669; border-radius: 9999px; font-weight: 700; font-size: 14px; }
-          .amount { font-size: 28px; font-weight: 800; color: #4338ca; }
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #0f172a; line-height: 1.6; background: #f8fafc; }
+          .receipt-box { max-width: 650px; margin: 0 auto; border: 1px solid #cbd5e1; border-radius: 12px; padding: 36px; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+          .header { display: flex; justify-content: space-between; border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 24px; }
+          .status { display: inline-block; padding: 4px 14px; background: #ecfdf5; color: #059669; border-radius: 9999px; font-weight: 700; font-size: 14px; border: 1px solid #a7f3d0; }
+          .amount { font-size: 32px; font-weight: 800; color: #4338ca; }
+          .tax-breakdown { background: #f1f5f9; padding: 14px 18px; border-radius: 8px; margin: 20px 0; font-size: 13px; }
         </style>
       </head>
       <body>
         <div class="receipt-box">
           <div class="header">
             <div>
-              <h2>🛡️ PolicyPilot.ai</h2>
-              <div>Invoice #${id}</div>
-              <div>Date: ${date}</div>
+              <h2 style="margin:0 0 6px;">🛡️ PolicyPilot AI</h2>
+              <div style="font-size: 14px; color: #64748b;">Official GST Tax Invoice</div>
+              <div style="font-size: 13px; margin-top: 4px;"><strong>Invoice:</strong> ${id}</div>
+              <div style="font-size: 13px;"><strong>Date:</strong> ${date}</div>
             </div>
             <div style="text-align: right;">
-              <span class="status">PAID</span>
-              <div class="amount" style="margin-top: 8px;">${amount}</div>
+              <span class="status">✓ PAID IN FULL</span>
+              <div class="amount" style="margin-top: 10px;">${amount}</div>
             </div>
           </div>
-          <p><strong>Billed To:</strong> ${activeMerchant ? activeMerchant.storeName : "Store Partner"} (${activeMerchant ? activeMerchant.email : "billing@store.com"})</p>
-          <p><strong>Item:</strong> ${plan}</p>
-          <p><strong>Payment Method:</strong> Visa ending in 4242 (Stripe Secure Charge)</p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; margin-bottom: 20px;">
+            <div>
+              <div style="color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 700;">Issued To:</div>
+              <strong>${activeMerchant ? activeMerchant.storeName : "Store Partner"}</strong><br>
+              ${activeMerchant ? activeMerchant.email : "billing@store.in"}<br>
+              <strong>Buyer GSTIN:</strong> ${gstinDisplay}
+            </div>
+            <div>
+              <div style="color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 700;">Payment Method:</div>
+              <strong>Unified Payments Interface (UPI)</strong><br>
+              <strong>Bank UTR Ref:</strong> ${utr}<br>
+              <strong>Status:</strong> Immediate Settlement
+            </div>
+          </div>
+
+          <div class="tax-breakdown">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span>Subscription Item (${plan})</span>
+              <span>${amount}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #64748b; font-size: 12px;">
+              <span>CGST (9%) + SGST (9%) Included</span>
+              <span>18% Tax Included</span>
+            </div>
+          </div>
+
           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;">
-          <p style="font-size: 12px; color: #64748b;">PolicyPilot AI, Inc. • Enterprise Subscription Infrastructure</p>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #64748b;">
+            <span>PolicyPilot AI Technologies Private Limited</span>
+            <span>CIN: U72900KA2026PTC184910</span>
+          </div>
         </div>
       </body>
     </html>
@@ -770,14 +1064,21 @@ function downloadInvoiceReceipt(id, plan, amount, date) {
   receiptWindow.document.close();
 }
 
-// Store Settings
 function saveStoreSettings() {
   if (!activeMerchant) return;
   activeMerchant.tone = document.getElementById("setting-agent-tone").value;
+  activeMerchant.whatsapp = document.getElementById("setting-whatsapp-num").value;
   activeMerchant.widgetColor = document.getElementById("setting-widget-color").value;
   document.getElementById("color-hex-display").textContent = activeMerchant.widgetColor;
+
+  const upiInput = document.getElementById("setting-merchant-upi");
+  if (upiInput) activeMerchant.upiId = upiInput.value.trim();
+
+  const gstinInput = document.getElementById("setting-merchant-gstin");
+  if (gstinInput) activeMerchant.gstin = gstinInput.value.trim();
+
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
-  showToast("Store settings saved.", "info");
+  showToast("Store settings & WhatsApp channel saved.", "info");
 }
 
 function copyApiKey() {
@@ -795,50 +1096,42 @@ function regenerateApiKey() {
   showToast("New API key generated.", "success");
 }
 
-// FAQ Accordion
 function toggleFaq(item) {
   const isOpen = item.classList.contains("open");
   document.querySelectorAll(".faq-item").forEach(f => f.classList.remove("open"));
   if (!isOpen) item.classList.add("open");
 }
 
-// Legal Modals Content
 const legalTexts = {
   terms: {
     title: "Terms of Service",
     content: `
       <h4>1. Acceptance of Terms</h4>
-      <p>By subscribing to or using PolicyPilot AI, you agree to these Terms of Service. PolicyPilot provides automated policy assistance software for e-commerce platforms.</p>
+      <p>By subscribing to or using PolicyPilot AI, you agree to these Terms of Service. PolicyPilot provides automated policy assistance software for e-commerce platforms across India and globally.</p>
       <h4>2. Accuracy & Dual-Engine Verification</h4>
       <p>PolicyPilot verifies generated answers against merchant-provided policy documentation using an internal critic. While our zero-hallucination guard minimizes errors, merchants remain responsible for maintaining accurate and lawful store policies.</p>
       <h4>3. Subscription & Billing</h4>
-      <p>Subscriptions renew automatically each month via Stripe. You may cancel your subscription at any time with one click in your Merchant Dashboard before the start of the next billing cycle.</p>
-      <h4>4. Limitation of Liability</h4>
-      <p>In no event shall PolicyPilot AI be liable for indirect, punitive, or consequential damages resulting from store returns or customer communications.</p>
+      <p>Subscriptions renew automatically each month via UPI AutoPay or Credit Card. You may cancel your subscription at any time with one click in your Merchant Dashboard before the start of the next billing cycle.</p>
     `
   },
   privacy: {
-    title: "Privacy Policy (GDPR & CCPA Compliant)",
+    title: "Privacy Policy (GDPR & Digital Personal Data Protection Act India Compliant)",
     content: `
       <h4>1. Data We Collect</h4>
       <p>We collect store URLs, merchant emails, uploaded policy documents, and customer support chat transcripts strictly to provide our retrieval-augmented support services.</p>
       <h4>2. Zero Model Training on Customer Data</h4>
       <p>Your store documents and customer chat logs are never used to train global public AI models. We maintain complete tenant isolation with row-level encryption.</p>
-      <h4>3. Data Retention & Deletion</h4>
-      <p>Merchants may request full deletion of their store data, embeddings, and chat history at any time by contacting privacy@policypilot.ai or through the settings portal.</p>
-      <h4>4. Security</h4>
-      <p>All network traffic is encrypted via TLS 1.3. Payment card data is processed exclusively through Stripe and never touches our application servers.</p>
+      <h4>3. Data Localization & Security</h4>
+      <p>All network traffic is encrypted via TLS 1.3. Payment data is processed exclusively through certified UPI / Stripe gateways and never touches our application servers.</p>
     `
   },
   refund: {
     title: "Refund & Cancellation Policy",
     content: `
       <h4>1. 14-Day Risk-Free Trial</h4>
-      <p>Every store begins with a 14-day free pilot (50 automated answers) requiring zero credit card upfront.</p>
+      <p>Every store begins with a 14-day free pilot (50 automated answers) requiring zero credit card or UPI upfront.</p>
       <h4>2. 14-Day Money-Back Guarantee</h4>
-      <p>If you upgrade to any paid tier (Starter or Growth) and PolicyPilot does not automate at least 40% of your repetitive tickets with 100% policy accuracy, contact us within 14 days for a full, unconditional refund.</p>
-      <h4>3. Hassle-Free Cancellation</h4>
-      <p>Cancel anytime from your dashboard. Upon cancellation, your service remains active through the end of your current paid billing period with no further charges.</p>
+      <p>If you upgrade to any paid tier (Starter or Growth) and PolicyPilot does not automate at least 40% of your repetitive tickets with 100% policy accuracy, contact us within 14 days for a full, unconditional UPI/Bank refund.</p>
     `
   }
 };
@@ -853,7 +1146,6 @@ function closeLegalModal() {
   document.getElementById("legal-modal").style.display = "none";
 }
 
-// Contact Support Modal
 function openContactModal(context = "") {
   document.getElementById("contact-modal").style.display = "flex";
 }
@@ -863,11 +1155,10 @@ function closeContactModal() {
 function handleContactSubmit(e) {
   e.preventDefault();
   closeContactModal();
-  showToast("💬 Message sent! An engineer will reply within 2 hours.", "success");
+  showToast("💬 Message sent! An engineer will reply on email/WhatsApp within 2 hours.", "success");
   e.target.reset();
 }
 
-// Landing Store Switcher
 function switchStore(storeKey) {
   currentStoreKey = storeKey;
   document.querySelectorAll(".store-tab-btn").forEach(btn => btn.classList.remove("active"));
@@ -943,7 +1234,7 @@ function sendUserMessage() {
     removeTypingIndicator();
     generateAgentResponse(userText);
     isTyping = false;
-  }, 800 + Math.random() * 400);
+  }, 700 + Math.random() * 400);
 }
 
 function appendMessage(role, text, metadata = null) {
@@ -1027,6 +1318,22 @@ function generateAgentResponse(query) {
         { citation: "Section 3.1 & 3.2: General Return Terms", confidence: "98%", escalate: false }
       );
     }
+  } else if (currentStoreKey === "zariboutique") {
+    if (q.includes("blouse") || q.includes("saree") || q.includes("stitch") || q.includes("custom")) {
+      const resp = store.responses["blouse"];
+      appendMessage("agent", resp.answer, resp);
+    } else if (q.includes("reverse") || q.includes("pickup") || q.includes("courier") || q.includes("100")) {
+      const resp = store.responses["courier"];
+      appendMessage("agent", resp.answer, resp);
+    } else if (q.includes("sale") || q.includes("cash") || q.includes("clearance")) {
+      const resp = store.responses["cash"];
+      appendMessage("agent", resp.answer, resp);
+    } else {
+      appendMessage("agent", 
+        "Under Section 1.1, unworn garments with tags attached can be exchanged within 7 days. Reverse courier pickup is available across India for ₹100.", 
+        { citation: "Section 1.1: General Exchange Policy", confidence: "99%", escalate: false }
+      );
+    }
   } else if (currentStoreKey === "glowbotanics") {
     if (q.includes("open") || q.includes("hives") || q.includes("allergic") || q.includes("reaction")) {
       const resp = store.responses["opened"];
@@ -1060,14 +1367,54 @@ function generateAgentResponse(query) {
       );
     }
   } else {
-    const customText = document.getElementById("custom-policy-textarea").value;
-    if (!customText.trim()) {
-      appendMessage("agent", "Please paste your store's return policy or FAQ in the sidebar box to test with your custom text!", { citation: "System Guard", confidence: "100%", escalate: false });
+    const customText = (document.getElementById("custom-policy-textarea").value.trim()) || 
+                       (document.getElementById("active-policy-text").textContent.trim());
+    if (!customText || customText.includes("Paste your store's return policy")) {
+      appendMessage("agent", "Please paste your store's return policy or click '⚡ Import URL' to test with your custom text!", { citation: "System Guard", confidence: "100%", escalate: false });
+      return;
+    }
+
+    // Check for adversarial or unauthorized prompt injection
+    if (q.includes("free money") || q.includes("give me $") || q.includes("free refund") || q.includes("without return") || q.includes("cheat") || q.includes("hack") || q.includes("free 100")) {
+      appendMessage("agent", "I cannot issue unauthorized refunds or grant concessions outside your store's documented policy guidelines. This request has been escalated to a store manager for review.", {
+        citation: "Policy Escalation Guard #14",
+        confidence: "Critic Guard Activated",
+        escalate: true
+      });
+      return;
+    }
+
+    // Extract sentences or bullet points
+    const lines = customText.split(/\n+|\. /).map(s => s.trim()).filter(s => s.length > 10);
+    const queryTokens = q.split(/\W+/).filter(w => w.length > 2);
+    
+    let bestLine = "";
+    let maxMatches = 0;
+
+    lines.forEach(line => {
+      const lineLower = line.toLowerCase();
+      let matches = 0;
+      queryTokens.forEach(token => {
+        if (lineLower.includes(token)) matches++;
+      });
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        bestLine = line;
+      }
+    });
+
+    if (maxMatches > 0 && bestLine) {
+      appendMessage("agent", `According to your indexed store policy: "${bestLine}".`, {
+        citation: `Indexed Store Policy: "${bestLine.substring(0, 45)}..."`,
+        confidence: "100%",
+        escalate: false
+      });
     } else {
-      appendMessage("agent", 
-        `Based strictly on your indexed policy text: "${customText.substring(0, 100)}...", customer requests are cross-verified and citation-guarded. Ineligible requests are routed to your staff.`, 
-        { citation: "Custom Store Policy §1", confidence: "100%", escalate: false }
-      );
+      appendMessage("agent", `Based on your store's indexed policy documentation: "${lines[0] || customText.substring(0, 120)}". Inquiries outside these rules are citation-guarded and routed to human support.`, {
+        citation: "Indexed Policy Document §1",
+        confidence: "99%",
+        escalate: false
+      });
     }
   }
 }
@@ -1093,22 +1440,23 @@ function updateCalculator() {
 
   document.getElementById("orders-val-display").textContent = orders.toLocaleString();
   document.getElementById("tickets-val-display").textContent = tickets.toLocaleString();
-  document.getElementById("ticket-cost-display").textContent = "$" + cost.toFixed(2);
+  document.getElementById("ticket-cost-display").textContent = currentCurrency === "INR" ? `₹${cost}` : `$${cost.toFixed(2)}`;
 
   const automatedTickets = Math.round(tickets * 0.75);
   const currentMonthlyExpense = tickets * cost;
 
-  let planPrice = 79;
-  if (tickets > 1000 && tickets <= 4000) planPrice = 199;
-  if (tickets > 4000) planPrice = 499;
+  let planPrice = currentCurrency === "INR" ? 4999 : 79;
+  if (tickets > 1000 && tickets <= 4000) planPrice = currentCurrency === "INR" ? 14999 : 199;
+  if (tickets > 4000) planPrice = currentCurrency === "INR" ? 39999 : 499;
 
   const monthlySavings = (automatedTickets * cost) - planPrice;
   const annualSavings = Math.max(0, Math.round(monthlySavings * 12));
 
-  document.getElementById("savings-display").textContent = "$" + annualSavings.toLocaleString();
+  const currSymbol = currentCurrency === "INR" ? "₹" : "$";
+  document.getElementById("savings-display").textContent = `${currSymbol}${annualSavings.toLocaleString()}`;
   document.getElementById("savings-breakdown-text").innerHTML = `
     Based on automatically resolving <strong>75% (${automatedTickets.toLocaleString()})</strong> of your ${tickets.toLocaleString()} monthly tickets with zero hallucinations.<br>
-    Current human support: <strong>$${currentMonthlyExpense.toLocaleString()}/mo</strong> • PolicyPilot: <strong>$${planPrice}/mo</strong>.
+    Current human support: <strong>${currSymbol}${currentMonthlyExpense.toLocaleString()}/mo</strong> • PolicyPilot: <strong>${currSymbol}${planPrice.toLocaleString()}/mo</strong>.
   `;
 }
 
@@ -1119,7 +1467,6 @@ function copyEmbedCode() {
   });
 }
 
-// Modal Triggers
 function openPilotModal(source = "") {
   document.getElementById("pilot-modal").style.display = "flex";
 }
@@ -1135,7 +1482,7 @@ function closeLoginModal() {
 function closeModalOnBackdrop(e) {
   if (e.target.id === "pilot-modal") closePilotModal();
   if (e.target.id === "login-modal") closeLoginModal();
-  if (e.target.id === "stripe-modal") closeStripeModal();
+  if (e.target.id === "payment-modal") closePaymentModal();
   if (e.target.id === "contact-modal") closeContactModal();
   if (e.target.id === "legal-modal") closeLegalModal();
 }

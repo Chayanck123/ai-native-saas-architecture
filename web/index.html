@@ -24,7 +24,7 @@
         <li><a href="#demo" id="nav-link-demo">Live Demo</a></li>
         <li><a href="#calculator" id="nav-link-calc">ROI Calculator</a></li>
         <li><a href="#features" id="nav-link-features">Why It Works</a></li>
-        <li><a href="#pricing" id="nav-link-pricing">Pricing</a></li>
+        <li><a href="#pricing" id="nav-link-pricing">Pricing (UPI / Cards)</a></li>
         <li><a href="#faq" id="nav-link-faq">FAQ</a></li>
       </ul>
 
@@ -53,7 +53,7 @@
       <div class="container">
         <div class="pill-tag" id="hero-pill-badge">
           <span class="pulse-dot"></span>
-          Built for Shopify, WooCommerce & D2C Brands
+          Built for Shopify, WooCommerce & D2C Brands (India & Global)
         </div>
         
         <h1 class="hero-title" id="hero-main-title">
@@ -87,7 +87,7 @@
             <div class="stat-label">Instant Customer Resolution</div>
           </div>
           <div class="stat-item">
-            <div class="stat-number">$2,900+</div>
+            <div class="stat-number" id="hero-savings-stat">₹2.4 Lakhs+</div>
             <div class="stat-label">Average Monthly Support Savings</div>
           </div>
         </div>
@@ -125,6 +125,14 @@
                   </div>
                 </button>
 
+                <button class="store-tab-btn" id="tab-zariboutique" onclick="switchStore('zariboutique')">
+                  <span class="store-tab-icon">👗</span>
+                  <div>
+                    <div class="store-tab-name">Zari Ethnic Wear (India)</div>
+                    <div class="store-tab-meta">Sarees & Kurtis • 7-Day Exchange</div>
+                  </div>
+                </button>
+
                 <button class="store-tab-btn" id="tab-glowbotanics" onclick="switchStore('glowbotanics')">
                   <span class="store-tab-icon">🌿</span>
                   <div>
@@ -144,8 +152,8 @@
                 <button class="store-tab-btn" id="tab-custom" onclick="switchStore('custom')">
                   <span class="store-tab-icon">✨</span>
                   <div>
-                    <div class="store-tab-name">Your Store (Custom)</div>
-                    <div class="store-tab-meta">Paste your policy or FAQ</div>
+                    <div class="store-tab-name">Your Store (1-Click URL)</div>
+                    <div class="store-tab-meta">Paste policy link or text</div>
                   </div>
                 </button>
               </div>
@@ -165,11 +173,15 @@
                 </div>
               </div>
 
-              <!-- Custom Policy Input -->
+              <!-- Custom Policy Input with 1-Click URL Importer -->
               <div class="custom-input-group" id="custom-policy-inputs" style="display: none;">
-                <label class="custom-input-label" for="custom-policy-textarea">Paste Your Store Policy / FAQs:</label>
-                <textarea id="custom-policy-textarea" class="custom-input" rows="3" placeholder="e.g. We accept returns within 14 days if unused. International buyers pay shipping..."></textarea>
-                <button class="btn btn-secondary btn-sm" id="btn-save-custom-policy" onclick="applyCustomPolicy()">Index My Policy</button>
+                <label class="custom-input-label">1-Click Policy Scraper / Text Input:</label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" id="custom-policy-url" class="custom-input" placeholder="https://yourstore.com/policies/refund-policy" style="flex: 1;">
+                  <button class="btn btn-secondary btn-sm" onclick="scrapeStorePolicyUrl()" style="white-space: nowrap;">⚡ Import URL</button>
+                </div>
+                <textarea id="custom-policy-textarea" class="custom-input" rows="2" placeholder="Or paste return policy rules here..."></textarea>
+                <button class="btn btn-primary btn-sm" id="btn-save-custom-policy" onclick="applyCustomPolicy()">Index Into AI Memory</button>
               </div>
             </div>
 
@@ -245,19 +257,19 @@
 
               <div class="slider-group">
                 <div class="slider-header">
-                  <span>Average Human Agent Cost (per ticket)</span>
-                  <span class="slider-val" id="ticket-cost-display">$5.00</span>
+                  <span>Human Support Cost (per ticket)</span>
+                  <span class="slider-val" id="ticket-cost-display">₹150</span>
                 </div>
-                <input type="range" id="cost-slider" min="2" max="12" step="0.5" value="5" oninput="updateCalculator()">
+                <input type="range" id="cost-slider" min="50" max="600" step="25" value="150" oninput="updateCalculator()">
               </div>
             </div>
 
             <div class="calc-results-box" id="roi-results-container">
               <div class="savings-label">ESTIMATED NET ANNUAL SAVINGS</div>
-              <div class="savings-amount" id="savings-display">$21,612</div>
+              <div class="savings-amount" id="savings-display">₹6,12,000</div>
               <div class="savings-breakdown" id="savings-breakdown-text">
-                Based on resolving <strong>75%</strong> of your 500 monthly tickets automatically with zero error rate.<br>
-                Current support expense: <strong>$2,500/mo</strong> • PolicyPilot: <strong>$199/mo</strong>.
+                Based on automatically resolving <strong>75% (375)</strong> of your 500 monthly tickets with zero hallucinations.<br>
+                Current support cost: <strong>₹75,000/mo</strong> • PolicyPilot: <strong>₹4,999/mo</strong>.
               </div>
               <button class="btn btn-primary btn-lg" onclick="openPilotModal('Calculator CTA')">
                 Lock In These Savings With Free Pilot
@@ -267,59 +279,140 @@
         </div>
       </section>
 
-      <!-- Transparent Pricing Section -->
+      <!-- Why It Works / Features Section -->
+      <section class="features-section" id="features">
+        <div class="container">
+          <div class="section-header">
+            <div class="pill-tag" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc;">
+              Zero-Hallucination Architecture
+            </div>
+            <h2 class="section-title">Why PolicyPilot Outperforms Generic Chatbots</h2>
+            <p class="section-desc">
+              Standard ChatGPT bots hallucinate fake return promises and confuse exchange rules. PolicyPilot is built with strict policy critic guards to safeguard your store's margins and reputation.
+            </p>
+          </div>
+
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon-box">🛡️</div>
+              <h3>Dual-Engine Critic Guard</h3>
+              <p>
+                Every drafted response is verified by an internal Critic AI against your indexed return and warranty clauses. If an answer cannot be cited with 100% confidence, PolicyPilot never bluffs—it routes the shopper to your team.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon-box">⚡</div>
+              <h3>1-Click Store Policy Scraper</h3>
+              <p>
+                Simply paste your store's return URL or policy page. Our crawler extracts clauses, structures FAQs, and updates vector embeddings in under 30 seconds.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon-box">🇮🇳</div>
+              <h3>India D2C & UPI Ready</h3>
+              <p>
+                Built natively for Indian e-commerce: reverse pickup fee calculation, 19,000+ pincode logistics awareness (Shiprocket/BlueDart), instant UPI QR payments, and GST-compliant tax invoices.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon-box">📱</div>
+              <h3>Seamless WhatsApp Fallback</h3>
+              <p>
+                When a complex inquiry arises or a customer requests human help, PolicyPilot transfers the chat directly to your store's WhatsApp support line with full context, avoiding repeat questions.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon-box">🛍️</div>
+              <h3>60-Second Shopify Theme Embed</h3>
+              <p>
+                No complicated backend deployment. Copy a single line of script into your Shopify <code>theme.liquid</code> file, customize the colors to match your brand, and go live immediately.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon-box">🔒</div>
+              <h3>Tenant Isolation & Privacy</h3>
+              <p>
+                Your store policies and customer conversations are strictly isolated with row-level encryption. Your proprietary data is never used to train public models.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Transparent Pricing Section with INR & USD Toggle -->
       <section class="pricing-section" id="pricing">
         <div class="container">
           <div class="section-header">
             <div class="pill-tag">Simple, Usage-Aligned Pricing</div>
             <h2 class="section-title">Invest in Savings, Not Extra Headcount</h2>
             <p class="section-desc">
-              All plans include a 14-day risk-free trial. If PolicyPilot doesn't deflect at least 40% of your tickets, you pay nothing.
+              All plans include a 14-day risk-free trial. Pay via UPI, GPay, PhonePe, Paytm, or Credit Card.
             </p>
+
+            <!-- Currency Toggle -->
+            <div style="margin-top: 24px;">
+              <div class="currency-toggle-wrapper">
+                <button class="currency-toggle-btn active" id="btn-curr-inr" onclick="setCurrency('INR')">
+                  🇮🇳 ₹ INR (UPI & QR)
+                </button>
+                <button class="currency-toggle-btn" id="btn-curr-usd" onclick="setCurrency('USD')">
+                  🌐 $ USD (Cards & Stripe)
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="pricing-grid">
             <div class="pricing-card" id="pricing-starter">
               <div class="plan-name">Starter Pilot</div>
               <div class="plan-desc">For growing boutiques and emerging D2C brands.</div>
-              <div class="plan-price">$79 <span>/ month</span></div>
+              <div class="plan-price" id="price-starter">₹4,999 <span>/ month</span></div>
               <ul class="plan-features">
                 <li><span>✓</span> Up to 1,000 automated answers</li>
                 <li><span>✓</span> Guaranteed 0% hallucination guard</li>
                 <li><span>✓</span> Full policy citations</li>
                 <li><span>✓</span> Standard web & Shopify widget</li>
-                <li><span>✓</span> Email support</li>
+                <li><span>✓</span> GST Invoicing supported</li>
               </ul>
-              <button class="btn btn-secondary" onclick="openStripeModal('Starter Plan', 79, 1000)">Subscribe with Stripe ($79/mo)</button>
+              <button class="btn btn-secondary" id="btn-pay-starter" onclick="openPaymentModal('Starter Plan', 4999, 79, 1000)">
+                ⚡ Pay with UPI / QR Code
+              </button>
             </div>
 
             <div class="pricing-card featured" id="pricing-growth">
               <div class="popular-badge">Most Popular</div>
               <div class="plan-name">Growth Store</div>
               <div class="plan-desc">For high-volume brands ready to automate repetitive tickets.</div>
-              <div class="plan-price">$199 <span>/ month</span></div>
+              <div class="plan-price" id="price-growth">₹14,999 <span>/ month</span></div>
               <ul class="plan-features">
                 <li><span>✓</span> Up to 4,000 automated answers</li>
                 <li><span>✓</span> Human-in-the-loop escalation routing</li>
+                <li><span>✓</span> WhatsApp support fallback</li>
                 <li><span>✓</span> Custom brand voice & color theming</li>
-                <li><span>✓</span> Analytics & policy gap dashboard</li>
-                <li><span>✓</span> Priority Slack & WhatsApp support</li>
+                <li><span>✓</span> Priority WhatsApp support</li>
               </ul>
-              <button class="btn btn-primary" onclick="openStripeModal('Growth Store', 199, 4000)">Subscribe with Stripe ($199/mo)</button>
+              <button class="btn btn-primary" id="btn-pay-growth" onclick="openPaymentModal('Growth Store', 14999, 199, 4000)">
+                ⚡ Pay with UPI / QR Code
+              </button>
             </div>
 
             <div class="pricing-card" id="pricing-scale">
               <div class="plan-name">Omnichannel Scale</div>
               <div class="plan-desc">For established retail operations & multi-store setups.</div>
-              <div class="plan-price">$499 <span>/ month</span></div>
+              <div class="plan-price" id="price-scale">₹39,999 <span>/ month</span></div>
               <ul class="plan-features">
                 <li><span>✓</span> Up to 15,000 automated answers</li>
                 <li><span>✓</span> Multiple storefront domains</li>
-                <li><span>✓</span> Gorgias, Zendesk & Klaviyo integrations</li>
+                <li><span>✓</span> Gorgias, Shiprocket & Klaviyo hooks</li>
                 <li><span>✓</span> Dedicated account onboarding engineer</li>
                 <li><span>✓</span> 99.9% uptime SLA</li>
               </ul>
-              <button class="btn btn-secondary" onclick="openContactModal('Omnichannel Scale Plan')">Talk to Sales</button>
+              <button class="btn btn-secondary" onclick="openContactModal('Omnichannel Scale Plan')">Talk to Founder</button>
             </div>
           </div>
         </div>
@@ -331,11 +424,21 @@
           <div class="section-header">
             <div class="pill-tag">Frequently Asked Questions</div>
             <h2 class="section-title">Everything You Need to Know</h2>
-            <p class="section-desc">Got questions about integrations, security, or guarantees? We've got answers.</p>
+            <p class="section-desc">Got questions about integrations, UPI, security, or guarantees? We've got answers.</p>
           </div>
 
           <div class="faq-container">
             <div class="faq-item open" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span>Can I pay using UPI, Google Pay, PhonePe, or Paytm?</span>
+                <span class="faq-chevron">▼</span>
+              </div>
+              <div class="faq-answer">
+                Yes! We support all Indian payment methods including instant UPI QR code scanning, Google Pay, PhonePe, Paytm, BHIM, CRED, NetBanking, and Indian business credit/debit cards. You also receive a GST-compliant invoice for input tax credit.
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
               <div class="faq-question">
                 <span>How does PolicyPilot guarantee 0% hallucinations?</span>
                 <span class="faq-chevron">▼</span>
@@ -351,7 +454,7 @@
                 <span class="faq-chevron">▼</span>
               </div>
               <div class="faq-answer">
-                It takes under 60 seconds. You copy a single line of script code from your dashboard and paste it right before the closing &lt;/body&gt; tag in your Shopify <code>theme.liquid</code> file. No coding or complex app installation required.
+                It takes under 60 seconds. You copy a single line of script code from your dashboard and paste it right before the closing &lt;/body&gt; tag in your Shopify <code>theme.liquid</code> file. No complex coding required.
               </div>
             </div>
 
@@ -361,17 +464,7 @@
                 <span class="faq-chevron">▼</span>
               </div>
               <div class="faq-answer">
-                Yes, absolutely. There are no contracts, lock-ins, or hidden cancellation fees. You can cancel, downgrade, or upgrade your subscription with one click directly inside your Merchant Dashboard.
-              </div>
-            </div>
-
-            <div class="faq-item" onclick="toggleFaq(this)">
-              <div class="faq-question">
-                <span>Is our store data and customer chat private?</span>
-                <span class="faq-chevron">▼</span>
-              </div>
-              <div class="faq-answer">
-                100% private. We use isolated multi-tenant architecture with row-level encryption. Your customer chats and policy documents are never used to train global public AI models.
+                Yes, absolutely. There are no long-term lock-ins or hidden cancellation fees. You can cancel, downgrade, or upgrade your subscription with one click directly inside your Merchant Dashboard.
               </div>
             </div>
 
@@ -381,7 +474,7 @@
                 <span class="faq-chevron">▼</span>
               </div>
               <div class="faq-answer">
-                You get 50 automated answers completely free for 14 days without entering a credit card. When your trial ends, you can choose to upgrade to our $79/mo Starter plan to keep your assistant live, or your assistant will automatically pause without charging you a cent.
+                You get 50 automated answers completely free for 14 days without entering a card or UPI ID. When your trial ends, you can choose to activate your plan to keep your assistant live, or it will simply pause with zero obligation.
               </div>
             </div>
           </div>
@@ -406,7 +499,7 @@
           </div>
         </div>
         <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 20px;">
-          &copy; 2026 PolicyPilot AI, Inc. All rights reserved. Built on enterprise AI-native multi-tenant architecture with Stripe payment infrastructure.
+          &copy; 2026 PolicyPilot AI, Inc. All rights reserved. Indian UPI Payments & Global Stripe Infrastructure.
         </div>
       </div>
     </footer>
@@ -483,7 +576,7 @@
             <span>SUPPORT COST SAVED</span>
             <span>💵 NET ROI</span>
           </div>
-          <div class="metric-card-val" style="color: #38bdf8;" id="dash-cost-saved-display">$70.00</div>
+          <div class="metric-card-val" style="color: #38bdf8;" id="dash-cost-saved-display">₹5,600</div>
           <div class="metric-card-sub">
             <span>⏱️</span> ~2.3 human labor hours saved
           </div>
@@ -505,7 +598,7 @@
           <span>🛍️</span> Shopify & Web Embed
         </button>
         <button class="dash-tab-btn" id="btn-tab-billing" onclick="switchDashTab('billing')">
-          <span>💳</span> Plans & Invoices
+          <span>💳</span> Plans & UPI Invoices
         </button>
         <button class="dash-tab-btn" id="btn-tab-settings" onclick="switchDashTab('settings')">
           <span>⚙️</span> Store Settings & API
@@ -553,19 +646,36 @@
           </div>
 
           <div class="embed-step-card" style="margin-bottom: 0;">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Add New Policy Rule / FAQ</h3>
+            <!-- 1-Click URL Scraper for Dashboard -->
+            <div class="dashboard-scraper-card">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #a5b4fc;">⚡ 1-Click Auto-Import from Store Website</h4>
+                <span class="trust-shield" style="font-size: 0.7rem;">Automated Web Scraper</span>
+              </div>
+              <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">
+                Paste any live Shopify/WooCommerce policy link (e.g. <code>https://yourstore.com/policies/refund-policy</code>). We will automatically extract and index your clauses into Vector AI memory.
+              </p>
+              <div style="display: flex; gap: 8px;">
+                <input type="url" id="dash-policy-scrape-url" class="custom-input" style="flex: 1;" placeholder="https://yourstore.com/policies/refund-policy">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="scrapeDashboardStorePolicyUrl()" style="white-space: nowrap;">
+                  ⚡ Auto-Extract & Index
+                </button>
+              </div>
+            </div>
+
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Add New Policy Rule Manually</h3>
             <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">
-              Add new return guidelines, holiday delivery cutoffs, or warranty terms. The AI will immediately cite them in future answers.
+              Add new return guidelines, festival delivery cutoffs, or warranty terms.
             </p>
             <form onsubmit="handleAddNewPolicy(event)">
               <div style="display: flex; flex-direction: column; gap: 14px;">
                 <div>
                   <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Policy Title / Section</label>
-                  <input type="text" id="new-policy-title" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Holiday Shipping Cutoff 2026" required>
+                  <input type="text" id="new-policy-title" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Diwali Delivery & Return Policy" required>
                 </div>
                 <div>
                   <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Exact Policy Rule / Clause</label>
-                  <textarea id="new-policy-content" class="custom-input" style="width: 100%; margin-top: 4px;" rows="4" placeholder="e.g. All orders placed before December 20 qualify for guaranteed Christmas delivery..." required></textarea>
+                  <textarea id="new-policy-content" class="custom-input" style="width: 100%; margin-top: 4px;" rows="4" placeholder="e.g. Pre-stitched ethnic wear and sale items are non-refundable. Size exchanges have a ₹100 courier pickup fee..." required></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" id="btn-save-new-policy">
                   ➕ Index Into Store AI Brain
@@ -657,7 +767,7 @@
         </div>
       </div>
 
-      <!-- TAB 5: Plans & Invoices (Stripe Payment Gateway) -->
+      <!-- TAB 5: Plans & UPI Invoices -->
       <div class="dash-panel" id="panel-billing">
         <div class="embed-step-card">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
@@ -672,47 +782,47 @@
             </div>
           </div>
 
-          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Available Subscription Upgrades</h4>
+          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Available Subscription Upgrades (UPI & Card)</h4>
           <div class="pricing-grid" style="margin-top: 0; margin-bottom: 32px;">
             <div class="pricing-card">
               <div class="plan-name">Starter Plan</div>
               <div class="plan-desc">For growing boutiques.</div>
-              <div class="plan-price">$79 <span>/ mo</span></div>
+              <div class="plan-price" id="dash-price-starter">₹4,999 <span>/ mo</span></div>
               <ul class="plan-features">
                 <li><span>✓</span> 1,000 automated answers / mo</li>
                 <li><span>✓</span> Zero-hallucination guarantee</li>
                 <li><span>✓</span> Standard Shopify embed</li>
               </ul>
-              <button class="btn btn-secondary" onclick="openStripeModal('Starter Plan', 79, 1000)">Pay with Stripe ($79/mo)</button>
+              <button class="btn btn-secondary" onclick="openPaymentModal('Starter Plan', 4999, 79, 1000)">⚡ Pay with UPI / QR Code</button>
             </div>
 
             <div class="pricing-card featured">
               <div class="popular-badge">Recommended</div>
               <div class="plan-name">Growth Store</div>
               <div class="plan-desc">For high-volume retail.</div>
-              <div class="plan-price">$199 <span>/ mo</span></div>
+              <div class="plan-price" id="dash-price-growth">₹14,999 <span>/ mo</span></div>
               <ul class="plan-features">
                 <li><span>✓</span> 4,000 automated answers / mo</li>
                 <li><span>✓</span> Human escalation routing</li>
                 <li><span>✓</span> Custom brand voice & color theming</li>
               </ul>
-              <button class="btn btn-primary" onclick="openStripeModal('Growth Store', 199, 4000)">Pay with Stripe ($199/mo)</button>
+              <button class="btn btn-primary" onclick="openPaymentModal('Growth Store', 14999, 199, 4000)">⚡ Pay with UPI / QR Code</button>
             </div>
           </div>
 
-          <!-- Billing Invoices History -->
+          <!-- Billing Invoices History with GST Support -->
           <div style="border-top: 1px solid var(--border-subtle); padding-top: 24px;">
-            <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Billing & Invoice History (Stripe Receipts)</h4>
+            <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Billing & Tax Invoices (UPI & GST Receipts)</h4>
             <div style="overflow-x: auto;">
               <table class="invoices-list-table">
                 <thead>
                   <tr>
-                    <th>Invoice ID</th>
+                    <th>Invoice / UTR ID</th>
                     <th>Date</th>
                     <th>Plan / Description</th>
                     <th>Amount</th>
                     <th>Status</th>
-                    <th>Receipt</th>
+                    <th>GST Receipt</th>
                   </tr>
                 </thead>
                 <tbody id="invoices-table-body"></tbody>
@@ -722,22 +832,26 @@
         </div>
       </div>
 
-      <!-- TAB 6: Store Settings & API Keys -->
+      <!-- TAB 6: Store Settings, WhatsApp & API Keys -->
       <div class="dash-panel" id="panel-settings">
         <div class="embed-step-card">
-          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 20px;">Store Configuration & API Access</h3>
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 20px;">Store Configuration & WhatsApp Escalation</h3>
           
           <div class="settings-grid">
             <div>
-              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px;">AI Persona & Brand Voice</h4>
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px;">AI Persona & WhatsApp Support</h4>
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
                   <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Support Tone</label>
                   <select id="setting-agent-tone" class="custom-input" style="width: 100%; margin-top: 4px;" onchange="saveStoreSettings()">
-                    <option value="friendly">Warm, Helpful & Enthusiastic (Standard)</option>
+                    <option value="friendly">Warm, Polite & Helpful (Indian E-commerce Standard)</option>
                     <option value="professional">Professional, Formal & Direct</option>
                     <option value="casual">Casual, Streetwear & Modern</option>
                   </select>
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Store Support WhatsApp Number (Optional)</label>
+                  <input type="text" id="setting-whatsapp-num" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="+91 98765 43210" onchange="saveStoreSettings()">
                 </div>
                 <div>
                   <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Widget Primary Color</label>
@@ -746,12 +860,20 @@
                     <span style="font-size: 0.85rem; color: var(--text-secondary);" id="color-hex-display">#6366f1 (Indigo Cyan)</span>
                   </div>
                 </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Store UPI ID / VPA (for Direct Store Payouts & Invoices)</label>
+                  <input type="text" id="setting-merchant-upi" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="policypilot@okhdfcbank" onchange="saveStoreSettings()">
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Store GSTIN (for B2B Tax Invoicing)</label>
+                  <input type="text" id="setting-merchant-gstin" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="27AAPFU0939F1ZV" onchange="saveStoreSettings()">
+                </div>
               </div>
             </div>
 
             <div>
               <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px;">Developer API Key</h4>
-              <p style="color: var(--text-secondary); font-size: 0.85rem;">Use this API key for headless storefronts or custom mobile apps.</p>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">Use this API key for headless storefronts, mobile apps, or custom webhooks.</p>
               <div class="api-key-box">
                 <span id="display-api-key">pk_live_948194028472910</span>
                 <button class="btn btn-secondary btn-sm" onclick="copyApiKey()">Copy</button>
@@ -767,54 +889,164 @@
   </div>
 
   <!-- ==============================================
-       MODALS: STRIPE, ONBOARDING, LEGAL & CONTACT
+       MODALS: DUAL UPI / STRIPE PAYMENT, ONBOARDING & LEGAL
   ============================================== -->
 
-  <!-- Stripe Checkout Modal -->
-  <div class="modal-overlay" id="stripe-modal" onclick="closeModalOnBackdrop(event)">
+  <!-- Dual Payment Modal (UPI & QR Code + Card) -->
+  <div class="modal-overlay" id="payment-modal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content stripe-modal-content">
-      <button class="modal-close" onclick="closeStripeModal()">&times;</button>
+      <button class="modal-close" onclick="closePaymentModal()">&times;</button>
       
-      <div class="stripe-badge-bar">
-        <span class="stripe-powered-text">💳 Powered by <strong>Stripe</strong></span>
-        <span>🔒 256-Bit SSL Secured</span>
+      <!-- Payment Method Switcher Tabs -->
+      <div class="payment-method-tabs">
+        <button class="payment-tab-btn active" id="tab-pay-upi" onclick="switchPaymentMethod('upi')">
+          <span>⚡</span> UPI & QR Code (India)
+        </button>
+        <button class="payment-tab-btn" id="tab-pay-card" onclick="switchPaymentMethod('card')">
+          <span>💳</span> Credit / Debit Card (Stripe)
+        </button>
       </div>
 
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h3 style="font-size: 1.3rem; font-weight: 800;" id="stripe-checkout-title">Subscribe to Starter Plan</h3>
+      <div style="text-align: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.3rem; font-weight: 800;" id="modal-checkout-title">Subscribe to Starter Plan</h3>
         <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
           Billed monthly. Cancel anytime with one click in your dashboard.
         </p>
-        <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin: 12px 0;" id="stripe-checkout-price">$79.00 <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin: 8px 0;" id="modal-checkout-price">
+          ₹4,999 <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">/ month</span>
+        </div>
       </div>
 
-      <form id="stripe-payment-form" onsubmit="handleStripePaymentSubmit(event)">
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          <div>
-            <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Email Address</label>
-            <input type="email" id="stripe-email" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="billing@yourstore.com">
-          </div>
+      <!-- METHOD 1: UPI & QR Code Section -->
+      <div id="payment-section-upi">
+        <div class="upi-qr-box" id="upi-qr-container">
+          <!-- Dynamic High-Resolution SVG QR Code -->
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" fill="white"/>
+            <!-- Corner Markers -->
+            <rect x="10" y="10" width="24" height="24" rx="3" fill="#0f172a"/>
+            <rect x="14" y="14" width="16" height="16" rx="2" fill="white"/>
+            <rect x="18" y="18" width="8" height="8" rx="1" fill="#6366f1"/>
 
-          <div>
-            <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Payment Card Information</label>
-            <div class="card-input-box" style="margin-top: 4px;">
-              <div class="card-number-row">
-                <span style="font-size: 1.1rem;">💳</span>
-                <input type="text" id="stripe-card-num" class="card-input-clean" placeholder="4242 •••• •••• 4242" maxlength="19" required oninput="formatCardNumber(this)">
-              </div>
-              <div class="card-split-row">
-                <input type="text" id="stripe-card-exp" class="card-input-clean" placeholder="MM / YY" maxlength="5" required oninput="formatCardExpiry(this)">
-                <input type="text" id="stripe-card-cvc" class="card-input-clean" placeholder="CVC" maxlength="4" required>
-                <input type="text" id="stripe-card-zip" class="card-input-clean" placeholder="ZIP" required>
+            <rect x="66" y="10" width="24" height="24" rx="3" fill="#0f172a"/>
+            <rect x="70" y="14" width="16" height="16" rx="2" fill="white"/>
+            <rect x="74" y="18" width="8" height="8" rx="1" fill="#6366f1"/>
+
+            <rect x="10" y="66" width="24" height="24" rx="3" fill="#0f172a"/>
+            <rect x="14" y="70" width="16" height="16" rx="2" fill="white"/>
+            <rect x="18" y="74" width="8" height="8" rx="1" fill="#6366f1"/>
+
+            <!-- Pattern Blocks -->
+            <rect x="40" y="12" width="6" height="6" fill="#0f172a"/>
+            <rect x="50" y="18" width="6" height="6" fill="#0f172a"/>
+            <rect x="42" y="28" width="6" height="6" fill="#0f172a"/>
+            <rect x="52" y="38" width="6" height="6" fill="#0f172a"/>
+            <rect x="12" y="42" width="6" height="6" fill="#0f172a"/>
+            <rect x="24" y="48" width="6" height="6" fill="#0f172a"/>
+            <rect x="34" y="52" width="6" height="6" fill="#0f172a"/>
+            <rect x="62" y="46" width="6" height="6" fill="#0f172a"/>
+            <rect x="74" y="52" width="6" height="6" fill="#0f172a"/>
+            <rect x="84" y="42" width="6" height="6" fill="#0f172a"/>
+            <rect x="42" y="66" width="6" height="6" fill="#0f172a"/>
+            <rect x="52" y="72" width="6" height="6" fill="#0f172a"/>
+            <rect x="62" y="68" width="6" height="6" fill="#0f172a"/>
+            <rect x="74" y="76" width="6" height="6" fill="#0f172a"/>
+            <rect x="84" y="82" width="6" height="6" fill="#0f172a"/>
+
+            <!-- Center Badge -->
+            <rect x="40" y="40" width="20" height="20" rx="4" fill="#6366f1"/>
+            <text x="50" y="54" font-size="11" font-weight="bold" fill="white" text-anchor="middle">UPI</text>
+          </svg>
+        </div>
+
+        <div class="upi-apps-row">
+          <span class="upi-app-pill"><span>⚡</span> Google Pay</span>
+          <span class="upi-app-pill"><span>⚡</span> PhonePe</span>
+          <span class="upi-app-pill"><span>⚡</span> Paytm</span>
+          <span class="upi-app-pill"><span>⚡</span> CRED</span>
+          <span class="upi-app-pill"><span>⚡</span> BHIM</span>
+        </div>
+
+        <!-- UPI ID Direct Payment & Copy Box -->
+        <div class="upi-id-badge-box">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">SCAN QR OR PAY DIRECTLY TO UPI ID:</div>
+          <div class="upi-id-copy-row">
+            <code id="upi-display-id">policypilot@okhdfcbank</code>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyUpiId()">📋 Copy</button>
+          </div>
+        </div>
+
+        <!-- Mobile 1-Tap Pay Deep Link -->
+        <a id="btn-upi-intent-link" href="upi://pay?pa=policypilot@okhdfcbank&pn=PolicyPilot%20AI&am=4999.00&cu=INR&tn=Starter%20Plan%20Subscription" class="btn btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 6px; font-weight: 700; color: #a5b4fc; border-color: rgba(99, 102, 241, 0.4); text-decoration: none;">
+          📱 Tap to Pay on Mobile (GPay / PhonePe / Paytm / CRED)
+        </a>
+
+        <form id="upi-payment-form" onsubmit="handleUpiPaymentSubmit(event)">
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">12-Digit Bank UTR / Reference No. (from GPay / PhonePe screen)</label>
+              <input type="text" id="upi-utr-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. 428190284719" maxlength="18">
+            </div>
+
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Enter Your VPA / Phone (Optional)</label>
+              <div class="upi-vpa-row">
+                <input type="text" id="upi-vpa-input" class="custom-input" style="flex: 1;" placeholder="yourname@okhdfcbank or 9876543210@paytm">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="sendUpiCollectRequest()">Verify VPA</button>
               </div>
             </div>
-          </div>
 
-          <button type="submit" class="btn btn-primary btn-lg" id="btn-stripe-pay" style="width: 100%; margin-top: 8px;">
-            🔒 Confirm & Activate Subscription ➔
-          </button>
+            <!-- Optional GSTIN field for business tax invoice -->
+            <div class="gst-box">
+              <label style="font-size: 0.78rem; font-weight: 600; color: #a5b4fc; display: flex; justify-content: space-between;">
+                <span>GSTIN / Tax ID (Optional for 18% Input Credit)</span>
+                <span style="color: var(--emerald);">GST Invoice</span>
+              </label>
+              <input type="text" id="upi-gstin-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="27AAPFU0939F1ZV">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-upi-confirm" style="width: 100%; margin-top: 6px;">
+              ⚡ Confirm UPI Payment & Activate Plan ➔
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- METHOD 2: Credit / Debit Card (Stripe) -->
+      <div id="payment-section-card" style="display: none;">
+        <div class="stripe-badge-bar">
+          <span class="stripe-powered-text">💳 Powered by <strong>Stripe</strong></span>
+          <span>🔒 256-Bit SSL Secured</span>
         </div>
-      </form>
+
+        <form id="stripe-payment-form" onsubmit="handleStripePaymentSubmit(event)">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Email Address</label>
+              <input type="email" id="stripe-email" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="billing@yourstore.com">
+            </div>
+
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Payment Card Information</label>
+              <div class="card-input-box" style="margin-top: 4px;">
+                <div class="card-number-row">
+                  <span style="font-size: 1.1rem;">💳</span>
+                  <input type="text" id="stripe-card-num" class="card-input-clean" placeholder="4242 •••• •••• 4242" maxlength="19" required oninput="formatCardNumber(this)">
+                </div>
+                <div class="card-split-row">
+                  <input type="text" id="stripe-card-exp" class="card-input-clean" placeholder="MM / YY" maxlength="5" required oninput="formatCardExpiry(this)">
+                  <input type="text" id="stripe-card-cvc" class="card-input-clean" placeholder="CVC" maxlength="4" required>
+                  <input type="text" id="stripe-card-zip" class="card-input-clean" placeholder="PIN / ZIP" required>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-stripe-pay" style="width: 100%; margin-top: 8px;">
+              🔒 Confirm & Activate Subscription ➔
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -834,7 +1066,7 @@
         <div style="display: flex; flex-direction: column; gap: 14px;">
           <div>
             <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="store-name-input">Store / Brand Name</label>
-            <input type="text" id="store-name-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Acme Apparel" required>
+            <input type="text" id="store-name-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Zari Ethnic Wear" required>
           </div>
           <div>
             <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="store-url-input">Store Website URL</label>
@@ -890,18 +1122,18 @@
         <div class="logo-badge" style="margin: 0 auto 12px;">💬</div>
         <h3 style="font-size: 1.4rem; font-weight: 800;">Contact PolicyPilot Support</h3>
         <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
-          Our technical engineering team typically responds within 2 hours.
+          Our team typically responds within 2 hours. WhatsApp support available.
         </p>
       </div>
       <form onsubmit="handleContactSubmit(event)">
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div>
             <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Your Name</label>
-            <input type="text" id="contact-name" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="Jane Doe">
+            <input type="text" id="contact-name" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="Rahul Sharma">
           </div>
           <div>
             <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Work Email</label>
-            <input type="email" id="contact-email" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="jane@store.com">
+            <input type="email" id="contact-email" class="custom-input" style="width: 100%; margin-top: 4px;" required placeholder="rahul@store.in">
           </div>
           <div>
             <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Message / Request</label>
@@ -919,9 +1151,7 @@
       <button class="modal-close" onclick="closeLegalModal()">&times;</button>
       <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 12px;" id="legal-modal-title">Terms of Service</h3>
       
-      <div class="legal-modal-body" id="legal-modal-content">
-        <!-- Rendered dynamically -->
-      </div>
+      <div class="legal-modal-body" id="legal-modal-content"></div>
       
       <button class="btn btn-secondary" onclick="closeLegalModal()" style="width: 100%; margin-top: 8px;">Close</button>
     </div>
