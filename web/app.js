@@ -360,17 +360,136 @@ function checkExistingSession() {
   }
 }
 
-// Sign Up Handler (Enters Dashboard)
-function handlePilotSubmit(e) {
+let pilotGeneratedOtp = "719284";
+let loginGeneratedOtp = "482910";
+let pilotOtpTimer = null;
+let loginOtpTimer = null;
+let pendingPilotData = null;
+let pendingLoginTarget = "+91 98765 43210";
+
+// OTP Input Navigation Helpers
+function handleOtpInput(curr, nextId, prevId) {
+  if (curr.value.length > 1) {
+    const digits = curr.value.replace(/\D/g, "");
+    const prefix = curr.id.split("-")[0];
+    for (let i = 1; i <= 6; i++) {
+      const box = document.getElementById(`${prefix}-otp-${i}`);
+      if (box && digits[i - 1]) box.value = digits[i - 1];
+    }
+    const lastBox = document.getElementById(`${prefix}-otp-6`);
+    if (lastBox) lastBox.focus();
+    return;
+  }
+  if (curr.value.length === 1 && nextId) {
+    const next = document.getElementById(nextId);
+    if (next) next.focus();
+  }
+}
+
+function handleOtpKey(e, prevId) {
+  if (e.key === "Backspace" && e.target.value === "" && prevId) {
+    const prev = document.getElementById(prevId);
+    if (prev) prev.focus();
+  }
+}
+
+// ==========================================
+// NEW USER PILOT SIGNUP OTP
+// ==========================================
+function handlePilotRequestOtp(e) {
   e.preventDefault();
   const storeName = document.getElementById("store-name-input").value.trim();
   const storeUrl = document.getElementById("store-url-input").value.trim();
-  const email = document.getElementById("founder-email-input").value.trim();
+  const contact = document.getElementById("founder-contact-input").value.trim();
+
+  if (!storeName || !storeUrl || !contact) {
+    showToast("⚠️ Please fill in all store details!", "warning");
+    return;
+  }
+
+  pendingPilotData = { storeName, storeUrl, contact };
+  pilotGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  document.getElementById("pilot-otp-target-display").textContent = contact;
+  document.getElementById("pilot-autofill-code").textContent = pilotGeneratedOtp;
+
+  document.getElementById("pilot-step-details").style.display = "none";
+  document.getElementById("pilot-step-otp").style.display = "block";
+
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById(`pilot-otp-${i}`);
+    if (b) b.value = "";
+  }
+  const firstBox = document.getElementById("pilot-otp-1");
+  if (firstBox) firstBox.focus();
+
+  startPilotCountdown(30);
+  showToast(`📲 Verification code sent to ${contact}: ${pilotGeneratedOtp}`, "success");
+}
+
+function startPilotCountdown(seconds) {
+  clearInterval(pilotOtpTimer);
+  let timeLeft = seconds;
+  const countdownDisplay = document.getElementById("pilot-countdown");
+  const resendBtn = document.getElementById("btn-pilot-resend");
+  if (resendBtn) resendBtn.disabled = true;
+
+  pilotOtpTimer = setInterval(() => {
+    timeLeft--;
+    if (countdownDisplay) countdownDisplay.textContent = `${timeLeft}s`;
+    if (timeLeft <= 0) {
+      clearInterval(pilotOtpTimer);
+      if (resendBtn) resendBtn.disabled = false;
+      if (countdownDisplay) countdownDisplay.textContent = "0s";
+    }
+  }, 1000);
+}
+
+function resendPilotOtp() {
+  pilotGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  document.getElementById("pilot-autofill-code").textContent = pilotGeneratedOtp;
+  startPilotCountdown(30);
+  showToast(`📲 New verification code sent to ${pendingPilotData.contact}: ${pilotGeneratedOtp}`, "success");
+}
+
+function autoFillPilotOtp() {
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById(`pilot-otp-${i}`);
+    if (b && pilotGeneratedOtp[i - 1]) b.value = pilotGeneratedOtp[i - 1];
+  }
+  showToast("⚡ OTP auto-filled!", "info");
+}
+
+function backToPilotDetails() {
+  clearInterval(pilotOtpTimer);
+  document.getElementById("pilot-step-otp").style.display = "none";
+  document.getElementById("pilot-step-details").style.display = "block";
+}
+
+function handlePilotVerifyOtp(e) {
+  e.preventDefault();
+  let enteredOtp = "";
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById(`pilot-otp-${i}`);
+    if (b) enteredOtp += b.value.trim();
+  }
+
+  if (enteredOtp !== pilotGeneratedOtp && enteredOtp.length > 0) {
+    showToast(`⚠️ Incorrect OTP code! Please enter the 6-digit code: ${pilotGeneratedOtp}`, "warning");
+    return;
+  }
+
+  const data = pendingPilotData || {
+    storeName: "My Online Store",
+    storeUrl: "https://mystore.com",
+    contact: "+91 98765 43210"
+  };
 
   activeMerchant = {
-    storeName: storeName || "My Online Store",
-    storeUrl: storeUrl || "https://mystore.com",
-    email: email,
+    storeName: data.storeName,
+    storeUrl: data.storeUrl,
+    contact: data.contact,
+    email: data.contact.includes("@") ? data.contact : `founder@${data.storeName.toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
     plan: "14-Day Free Pilot",
     creditsLeft: 48,
     totalCredits: 50,
@@ -378,8 +497,14 @@ function handlePilotSubmit(e) {
     costSaved: 5600,
     apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
     tone: "friendly",
-    whatsapp: "+91 98765 43210",
+    whatsapp: data.contact.startsWith("+") ? data.contact : "+91 98765 43210",
     widgetColor: "#6366f1",
+    upiId: "policypilot@okhdfcbank",
+    gstin: "27AAPFU0939F1ZV",
+    bankHolder: `${data.storeName} Technologies`,
+    bankAcc: "50100492810481",
+    bankIfsc: "HDFC0000123",
+    bankName: "HDFC Bank",
     policies: [
       {
         id: "p1",
@@ -401,13 +526,172 @@ function handlePilotSubmit(e) {
     invoices: [...sampleInvoices]
   };
 
-  localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+  saveMerchantToStore(activeMerchant);
   closePilotModal();
-  showToast(`🎉 Welcome ${storeName}! Entering your Merchant Command Center...`, "success");
-  
+  showToast(`🎉 Account Verified! Welcome ${data.storeName}!`, "success");
   setTimeout(() => {
     switchView("dashboard");
   }, 400);
+}
+
+// ==========================================
+// OLD / RETURNING USER LOGIN OTP
+// ==========================================
+function handleLoginRequestOtp(e) {
+  e.preventDefault();
+  const identifier = document.getElementById("login-identifier-input").value.trim();
+  if (!identifier) {
+    showToast("⚠️ Please enter your phone number or email!", "warning");
+    return;
+  }
+
+  pendingLoginTarget = identifier;
+  loginGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  document.getElementById("login-otp-target-display").textContent = identifier;
+  document.getElementById("login-autofill-code").textContent = loginGeneratedOtp;
+
+  document.getElementById("login-step-credentials").style.display = "none";
+  document.getElementById("login-step-otp").style.display = "block";
+
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById(`login-otp-${i}`);
+    if (b) b.value = "";
+  }
+  const firstBox = document.getElementById("login-otp-1");
+  if (firstBox) firstBox.focus();
+
+  startLoginCountdown(30);
+  showToast(`📲 Login OTP sent to ${identifier}: ${loginGeneratedOtp}`, "success");
+}
+
+function startLoginCountdown(seconds) {
+  clearInterval(loginOtpTimer);
+  let timeLeft = seconds;
+  const countdownDisplay = document.getElementById("login-countdown");
+  const resendBtn = document.getElementById("btn-login-resend");
+  if (resendBtn) resendBtn.disabled = true;
+
+  loginOtpTimer = setInterval(() => {
+    timeLeft--;
+    if (countdownDisplay) countdownDisplay.textContent = `${timeLeft}s`;
+    if (timeLeft <= 0) {
+      clearInterval(loginOtpTimer);
+      if (resendBtn) resendBtn.disabled = false;
+      if (countdownDisplay) countdownDisplay.textContent = "0s";
+    }
+  }, 1000);
+}
+
+function resendLoginOtp() {
+  loginGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  document.getElementById("login-autofill-code").textContent = loginGeneratedOtp;
+  startLoginCountdown(30);
+  showToast(`📲 New login code sent to ${pendingLoginTarget}: ${loginGeneratedOtp}`, "success");
+}
+
+function autoFillLoginOtp() {
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById(`login-otp-${i}`);
+    if (b && loginGeneratedOtp[i - 1]) b.value = loginGeneratedOtp[i - 1];
+  }
+  showToast("⚡ OTP auto-filled!", "info");
+}
+
+function backToLoginCredentials() {
+  clearInterval(loginOtpTimer);
+  document.getElementById("login-step-otp").style.display = "none";
+  document.getElementById("login-step-credentials").style.display = "block";
+}
+
+function handleLoginVerifyOtp(e) {
+  e.preventDefault();
+  let enteredOtp = "";
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById(`login-otp-${i}`);
+    if (b) enteredOtp += b.value.trim();
+  }
+
+  if (enteredOtp !== loginGeneratedOtp && enteredOtp.length > 0) {
+    showToast(`⚠️ Incorrect OTP code! Please enter the 6-digit code: ${loginGeneratedOtp}`, "warning");
+    return;
+  }
+
+  const existing = findMerchantByContact(pendingLoginTarget);
+  if (existing) {
+    activeMerchant = existing;
+  } else {
+    const storeName = pendingLoginTarget.includes("@") 
+      ? pendingLoginTarget.split("@")[0].toUpperCase() + " Store"
+      : "Zari Ethnic Wear (India)";
+    
+    activeMerchant = {
+      storeName: storeName,
+      storeUrl: pendingLoginTarget.includes("@") ? `https://${pendingLoginTarget.split("@")[1] || "store.in"}` : "https://zariethnic.in",
+      contact: pendingLoginTarget,
+      email: pendingLoginTarget.includes("@") ? pendingLoginTarget : "support@zariethnic.in",
+      plan: "14-Day Free Pilot",
+      creditsLeft: 48,
+      totalCredits: 50,
+      ticketsResolved: 14,
+      costSaved: 5600,
+      apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
+      tone: "friendly",
+      whatsapp: "+91 98765 43210",
+      widgetColor: "#6366f1",
+      upiId: "policypilot@okhdfcbank",
+      gstin: "27AAPFU0939F1ZV",
+      bankHolder: "Chayan Kumar / PolicyPilot",
+      bankAcc: "50100492810481",
+      bankIfsc: "HDFC0000123",
+      bankName: "HDFC Bank",
+      policies: [
+        {
+          id: "p1",
+          title: "7-Day Exchange Window",
+          content: "Unworn sarees, kurtis, and lehengas with tags attached may be exchanged within 7 days."
+        },
+        {
+          id: "p2",
+          title: "Reverse Courier Fee",
+          content: "Reverse pickup available across India for ₹100 fee."
+        }
+      ],
+      tickets: [...sampleTickets],
+      invoices: [...sampleInvoices]
+    };
+  }
+
+  saveMerchantToStore(activeMerchant);
+  closeLoginModal();
+  showToast(`🎉 Logged in! Welcome back, ${activeMerchant.storeName}!`, "success");
+  setTimeout(() => {
+    switchView("dashboard");
+  }, 400);
+}
+
+// Multi-tenant merchant persistence helpers
+function saveMerchantToStore(merchant) {
+  localStorage.setItem("policypilot_active_merchant", JSON.stringify(merchant));
+  try {
+    let all = JSON.parse(localStorage.getItem("policypilot_all_merchants") || "[]");
+    const idx = all.findIndex(m => m.contact === merchant.contact || m.email === merchant.email);
+    if (idx >= 0) {
+      all[idx] = merchant;
+    } else {
+      all.push(merchant);
+    }
+    localStorage.setItem("policypilot_all_merchants", JSON.stringify(all));
+  } catch (e) {}
+}
+
+function findMerchantByContact(contact) {
+  try {
+    const all = JSON.parse(localStorage.getItem("policypilot_all_merchants") || "[]");
+    return all.find(m => m.contact === contact || m.email === contact);
+  } catch (e) {
+    return null;
+  }
 }
 
 // Quick Demo Login
@@ -416,6 +700,7 @@ function quickLoginDemoStore() {
   activeMerchant = {
     storeName: "Zari Ethnic Wear (India)",
     storeUrl: "https://zariethnic.in",
+    contact: "+91 98765 43210",
     email: "support@zariethnic.in",
     plan: "14-Day Free Pilot",
     creditsLeft: 48,
@@ -426,6 +711,12 @@ function quickLoginDemoStore() {
     tone: "friendly",
     whatsapp: "+91 98765 43210",
     widgetColor: "#6366f1",
+    upiId: "policypilot@okhdfcbank",
+    gstin: "27AAPFU0939F1ZV",
+    bankHolder: "Zari Ethnic Wear India Pvt Ltd",
+    bankAcc: "50100492810481",
+    bankIfsc: "HDFC0000123",
+    bankName: "HDFC Bank",
     policies: [
       {
         id: "p1",
@@ -441,41 +732,8 @@ function quickLoginDemoStore() {
     tickets: [...sampleTickets],
     invoices: [...sampleInvoices]
   };
-  localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+  saveMerchantToStore(activeMerchant);
   showToast("⚡ Logged in as Zari Ethnic Wear!", "success");
-  switchView("dashboard");
-}
-
-function handleLoginSubmit(e) {
-  e.preventDefault();
-  const email = document.getElementById("login-email-input").value.trim();
-  const storeName = email.split("@")[0].toUpperCase() + " Store";
-  activeMerchant = {
-    storeName: storeName,
-    storeUrl: `https://${email.split("@")[1] || "store.in"}`,
-    email: email,
-    plan: "14-Day Free Pilot",
-    creditsLeft: 50,
-    totalCredits: 50,
-    ticketsResolved: 8,
-    costSaved: 3200,
-    apiKey: "pk_live_" + Math.random().toString(36).substring(2, 14),
-    tone: "professional",
-    whatsapp: "",
-    widgetColor: "#6366f1",
-    policies: [
-      {
-        id: "p1",
-        title: "Store General Return Policy",
-        content: "Returns accepted within 14 days of purchase in original packaging."
-      }
-    ],
-    tickets: [...sampleTickets],
-    invoices: [...sampleInvoices]
-  };
-  localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
-  closeLoginModal();
-  showToast(`Logged in successfully!`, "success");
   switchView("dashboard");
 }
 
@@ -522,6 +780,18 @@ function renderDashboard() {
   }
   if (activeMerchant.gstin && document.getElementById("setting-merchant-gstin")) {
     document.getElementById("setting-merchant-gstin").value = activeMerchant.gstin;
+  }
+  if (activeMerchant.bankHolder && document.getElementById("setting-bank-holder")) {
+    document.getElementById("setting-bank-holder").value = activeMerchant.bankHolder;
+  }
+  if (activeMerchant.bankAcc && document.getElementById("setting-bank-acc")) {
+    document.getElementById("setting-bank-acc").value = activeMerchant.bankAcc;
+  }
+  if (activeMerchant.bankIfsc && document.getElementById("setting-bank-ifsc")) {
+    document.getElementById("setting-bank-ifsc").value = activeMerchant.bankIfsc;
+  }
+  if (activeMerchant.bankName && document.getElementById("setting-bank-name")) {
+    document.getElementById("setting-bank-name").value = activeMerchant.bankName;
   }
 
   // Embed snippet tailored
@@ -820,7 +1090,7 @@ function copyUpiId() {
   });
 }
 
-// Payment Modal Controller (UPI + Stripe)
+// Payment Modal Controller (UPI + Bank Transfer + Stripe)
 function openPaymentModal(planName, inrPrice, usdPrice, credits) {
   pendingPlan = { name: planName, inr: inrPrice, usd: usdPrice, credits: credits };
   
@@ -840,6 +1110,17 @@ function openPaymentModal(planName, inrPrice, usdPrice, credits) {
     intentLink.href = `upi://pay?pa=${merchantUpi}&pn=PolicyPilot%20AI&am=${inrPrice}.00&cu=INR&tn=${encodeURIComponent(planName + ' Subscription')}`;
   }
 
+  // Set Bank Details display from active merchant if customized
+  const merchantBankHolder = (activeMerchant && activeMerchant.bankHolder) ? activeMerchant.bankHolder : "Chayan Kumar / PolicyPilot";
+  const merchantBankAcc = (activeMerchant && activeMerchant.bankAcc) ? activeMerchant.bankAcc : "50100492810481";
+  const merchantBankIfsc = (activeMerchant && activeMerchant.bankIfsc) ? activeMerchant.bankIfsc : "HDFC0000123";
+  const merchantBankName = (activeMerchant && activeMerchant.bankName) ? activeMerchant.bankName : "HDFC Bank (Connaught Place / Koramangala)";
+
+  if (document.getElementById("bank-holder-display")) document.getElementById("bank-holder-display").textContent = merchantBankHolder;
+  if (document.getElementById("bank-acc-display")) document.getElementById("bank-acc-display").textContent = merchantBankAcc;
+  if (document.getElementById("bank-ifsc-display")) document.getElementById("bank-ifsc-display").textContent = merchantBankIfsc;
+  if (document.getElementById("bank-name-display")) document.getElementById("bank-name-display").textContent = merchantBankName;
+
   // Set default tab based on currency
   if (currentCurrency === "INR") {
     switchPaymentMethod("upi");
@@ -856,21 +1137,90 @@ function closePaymentModal() {
 
 function switchPaymentMethod(method) {
   const upiTab = document.getElementById("tab-pay-upi");
+  const bankTab = document.getElementById("tab-pay-bank");
   const cardTab = document.getElementById("tab-pay-card");
   const upiSection = document.getElementById("payment-section-upi");
+  const bankSection = document.getElementById("payment-section-bank");
   const cardSection = document.getElementById("payment-section-card");
 
+  [upiTab, bankTab, cardTab].forEach(t => t && t.classList.remove("active"));
+  [upiSection, bankSection, cardSection].forEach(s => s && (s.style.display = "none"));
+
   if (method === "upi") {
-    upiTab.classList.add("active");
-    cardTab.classList.remove("active");
-    upiSection.style.display = "block";
-    cardSection.style.display = "none";
+    if (upiTab) upiTab.classList.add("active");
+    if (upiSection) upiSection.style.display = "block";
+  } else if (method === "bank") {
+    if (bankTab) bankTab.classList.add("active");
+    if (bankSection) bankSection.style.display = "block";
   } else {
-    cardTab.classList.add("active");
-    upiTab.classList.remove("active");
-    cardSection.style.display = "block";
-    upiSection.style.display = "none";
+    if (cardTab) cardTab.classList.add("active");
+    if (cardSection) cardSection.style.display = "block";
   }
+}
+
+function copyBankAcc() {
+  const acc = document.getElementById("bank-acc-display").textContent.trim();
+  navigator.clipboard.writeText(acc).then(() => {
+    showToast(`📋 Bank Account Number copied: ${acc}`, "success");
+  });
+}
+
+function copyBankIfsc() {
+  const ifsc = document.getElementById("bank-ifsc-display").textContent.trim();
+  navigator.clipboard.writeText(ifsc).then(() => {
+    showToast(`📋 IFSC Code copied: ${ifsc}`, "success");
+  });
+}
+
+// Handle Bank Transfer Confirmation
+function handleBankPaymentSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn-bank-confirm");
+  btn.innerHTML = `<span class="pulse-dot"></span> Verifying IMPS Settlement Reference with Bank...`;
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.innerHTML = `⚡ Confirm Bank Transfer & Activate Plan ➔`;
+    btn.disabled = false;
+    closePaymentModal();
+
+    if (!activeMerchant) {
+      quickLoginDemoStore();
+    }
+
+    const enteredUtr = document.getElementById("bank-utr-input") ? document.getElementById("bank-utr-input").value.trim() : "";
+    const finalUtr = enteredUtr || ("IMPS" + Math.floor(100000000000 + Math.random() * 900000000000));
+    const gstin = (document.getElementById("bank-gstin-input") && document.getElementById("bank-gstin-input").value.trim()) || "Unregistered (B2C)";
+    const amountStr = currentCurrency === "INR" ? `₹${pendingPlan.inr.toLocaleString()}` : `$${pendingPlan.usd}.00`;
+
+    if (gstin !== "Unregistered (B2C)") {
+      activeMerchant.gstin = gstin;
+    }
+
+    activeMerchant.plan = `${pendingPlan.name} (${amountStr}/mo)`;
+    activeMerchant.creditsLeft += pendingPlan.credits;
+    activeMerchant.totalCredits += pendingPlan.credits;
+
+    // Create GST Invoice
+    const newInvoice = {
+      id: "INV_BANK_" + Math.random().toString(36).substring(2, 9).toUpperCase(),
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      plan: `${pendingPlan.name} (Direct IMPS Transfer)`,
+      amount: amountStr,
+      status: "PAID",
+      utr: finalUtr,
+      gstin: gstin
+    };
+    if (!activeMerchant.invoices) activeMerchant.invoices = [];
+    activeMerchant.invoices.unshift(newInvoice);
+
+    localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
+    renderDashboard();
+    switchView("dashboard");
+    switchDashTab("billing");
+
+    showToast(`🎉 Bank Transfer Verified! ${pendingPlan.credits.toLocaleString()} credits added to your store!`, "success");
+  }, 1200);
 }
 
 function sendUpiCollectRequest() {
@@ -1077,8 +1427,20 @@ function saveStoreSettings() {
   const gstinInput = document.getElementById("setting-merchant-gstin");
   if (gstinInput) activeMerchant.gstin = gstinInput.value.trim();
 
+  const bankHolderInput = document.getElementById("setting-bank-holder");
+  if (bankHolderInput) activeMerchant.bankHolder = bankHolderInput.value.trim();
+
+  const bankAccInput = document.getElementById("setting-bank-acc");
+  if (bankAccInput) activeMerchant.bankAcc = bankAccInput.value.trim();
+
+  const bankIfscInput = document.getElementById("setting-bank-ifsc");
+  if (bankIfscInput) activeMerchant.bankIfsc = bankIfscInput.value.trim();
+
+  const bankNameInput = document.getElementById("setting-bank-name");
+  if (bankNameInput) activeMerchant.bankName = bankNameInput.value.trim();
+
   localStorage.setItem("policypilot_active_merchant", JSON.stringify(activeMerchant));
-  showToast("Store settings & WhatsApp channel saved.", "info");
+  showToast("Store settings, payout details & WhatsApp channel saved.", "info");
 }
 
 function copyApiKey() {

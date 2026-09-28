@@ -868,6 +868,31 @@
                   <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Store GSTIN (for B2B Tax Invoicing)</label>
                   <input type="text" id="setting-merchant-gstin" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="27AAPFU0939F1ZV" onchange="saveStoreSettings()">
                 </div>
+                
+                <!-- Receiving Bank Details Section -->
+                <div style="border-top: 1px solid var(--border-subtle); padding-top: 12px; margin-top: 6px;">
+                  <h5 style="font-size: 0.85rem; font-weight: 700; color: #a5b4fc; margin-bottom: 8px;">🏦 Receiving Bank Details (Where Money Gets Transferred)</h5>
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                      <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Account Holder Name</label>
+                      <input type="text" id="setting-bank-holder" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Chayan Kumar / PolicyPilot" onchange="saveStoreSettings()">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                      <div>
+                        <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Bank Account Number</label>
+                        <input type="text" id="setting-bank-acc" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. 50100492810481" onchange="saveStoreSettings()">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Bank IFSC Code</label>
+                        <input type="text" id="setting-bank-ifsc" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. HDFC0000123" onchange="saveStoreSettings()">
+                      </div>
+                    </div>
+                    <div>
+                      <label style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Bank Name & Branch</label>
+                      <input type="text" id="setting-bank-name" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. HDFC Bank, Koramangala" onchange="saveStoreSettings()">
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -900,10 +925,13 @@
       <!-- Payment Method Switcher Tabs -->
       <div class="payment-method-tabs">
         <button class="payment-tab-btn active" id="tab-pay-upi" onclick="switchPaymentMethod('upi')">
-          <span>⚡</span> UPI & QR Code (India)
+          <span>⚡</span> UPI & QR Code
+        </button>
+        <button class="payment-tab-btn" id="tab-pay-bank" onclick="switchPaymentMethod('bank')">
+          <span>🏦</span> Bank Transfer (IMPS / NEFT)
         </button>
         <button class="payment-tab-btn" id="tab-pay-card" onclick="switchPaymentMethod('card')">
-          <span>💳</span> Credit / Debit Card (Stripe)
+          <span>💳</span> Card / Stripe
         </button>
       </div>
 
@@ -1012,7 +1040,71 @@
         </form>
       </div>
 
-      <!-- METHOD 2: Credit / Debit Card (Stripe) -->
+      <!-- METHOD 2: Direct Bank Account Transfer (IMPS / NEFT) -->
+      <div id="payment-section-bank" style="display: none;">
+        <div style="background: rgba(13, 18, 34, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+            <span style="font-weight: 700; color: #a5b4fc; font-size: 0.9rem;">Receiving Bank Account Details</span>
+            <span class="trust-shield" style="font-size: 0.7rem;">Verified Account</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted);">Account Holder:</span>
+              <strong id="bank-holder-display" style="color: var(--text-primary);">Chayan Kumar / PolicyPilot</strong>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted);">Account Number:</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <code id="bank-acc-display" style="font-family: var(--font-mono); color: #38bdf8; font-size: 0.95rem; font-weight: 700;">50100492810481</code>
+                <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.7rem;" onclick="copyBankAcc()">📋</button>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted);">IFSC Code:</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <code id="bank-ifsc-display" style="font-family: var(--font-mono); color: #38bdf8; font-size: 0.95rem; font-weight: 700;">HDFC0000123</code>
+                <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.7rem;" onclick="copyBankIfsc()">📋</button>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted);">Bank & Branch:</span>
+              <strong id="bank-name-display" style="color: var(--text-primary);">HDFC Bank (Connaught Place / Koramangala)</strong>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--text-muted);">Transfer Mode:</span>
+              <span style="color: var(--emerald); font-weight: 600;">IMPS (Instant 2-Sec Settlement) / NEFT / RTGS</span>
+            </div>
+          </div>
+        </div>
+
+        <form id="bank-transfer-form" onsubmit="handleBankPaymentSubmit(event)">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Bank IMPS UTR / Transaction Reference Number (from your bank SMS/App)</label>
+              <input type="text" id="bank-utr-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. 428190284719" required>
+            </div>
+
+            <div class="gst-box">
+              <label style="font-size: 0.78rem; font-weight: 600; color: #a5b4fc; display: flex; justify-content: space-between;">
+                <span>GSTIN / Business Tax ID (Optional for 18% Input Credit)</span>
+                <span style="color: var(--emerald);">GST Tax Receipt</span>
+              </label>
+              <input type="text" id="bank-gstin-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="27AAPFU0939F1ZV">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-bank-confirm" style="width: 100%; margin-top: 6px;">
+              ⚡ Confirm Bank Transfer & Activate Plan ➔
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- METHOD 3: Credit / Debit Card (Stripe) -->
       <div id="payment-section-card" style="display: none;">
         <div class="stripe-badge-bar">
           <span class="stripe-powered-text">💳 Powered by <strong>Stripe</strong></span>
@@ -1050,67 +1142,153 @@
     </div>
   </div>
 
-  <!-- Pilot Signup Modal -->
+  <!-- Pilot Signup Modal (New Users with OTP) -->
   <div class="modal-overlay" id="pilot-modal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content">
       <button class="modal-close" onclick="closePilotModal()">&times;</button>
-      <div style="text-align: center; margin-bottom: 20px;">
-        <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
-        <h3 style="font-size: 1.4rem; font-weight: 800;">Get Your 14-Day Free Pilot</h3>
-        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
-          Enter your store details. You will get instant access to your merchant command center.
-        </p>
+      
+      <!-- STEP 1: Store Details & Phone/Email Input -->
+      <div id="pilot-step-details">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
+          <h3 style="font-size: 1.4rem; font-weight: 800;">Get Your 14-Day Free Pilot</h3>
+          <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
+            Enter your store details. You will receive a 6-digit OTP to verify your account.
+          </p>
+        </div>
+
+        <form id="pilot-signup-form" onsubmit="handlePilotRequestOtp(event)">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="store-name-input">Store / Brand Name</label>
+              <input type="text" id="store-name-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Zari Ethnic Wear" required>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="store-url-input">Store Website URL</label>
+              <input type="url" id="store-url-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="https://yourstore.com" required>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="founder-contact-input">Mobile Phone (or Work Email)</label>
+              <input type="text" id="founder-contact-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="+91 98765 43210 or founder@yourstore.com" required value="+91 98765 43210">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-pilot-otp" style="width: 100%; margin-top: 8px;">
+              ⚡ Send OTP Verification Code ➔
+            </button>
+          </div>
+        </form>
       </div>
 
-      <form id="pilot-signup-form" onsubmit="handlePilotSubmit(event)">
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          <div>
-            <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="store-name-input">Store / Brand Name</label>
-            <input type="text" id="store-name-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="e.g. Zari Ethnic Wear" required>
-          </div>
-          <div>
-            <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="store-url-input">Store Website URL</label>
-            <input type="url" id="store-url-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="https://yourstore.com" required>
-          </div>
-          <div>
-            <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;" for="founder-email-input">Work Email</label>
-            <input type="email" id="founder-email-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="founder@yourstore.com" required>
-          </div>
-          <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-pilot" style="width: 100%; margin-top: 8px;">
-            Activate My Store Command Center ➔
-          </button>
+      <!-- STEP 2: OTP Verification Screen -->
+      <div id="pilot-step-otp" style="display: none;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div class="auth-badge-header">🔒 2-Factor OTP Verification</div>
+          <h3 style="font-size: 1.35rem; font-weight: 800;">Verify & Activate Pilot</h3>
+          <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
+            Enter the 6-digit code sent to <strong id="pilot-otp-target-display" style="color: #a5b4fc;">+91 98765 43210</strong>
+          </p>
         </div>
-      </form>
+
+        <form onsubmit="handlePilotVerifyOtp(event)">
+          <div class="otp-container" id="pilot-otp-boxes">
+            <input type="text" maxlength="1" class="otp-digit-input" id="pilot-otp-1" oninput="handleOtpInput(this, 'pilot-otp-2', null)" onkeydown="handleOtpKey(event, null)">
+            <input type="text" maxlength="1" class="otp-digit-input" id="pilot-otp-2" oninput="handleOtpInput(this, 'pilot-otp-3', 'pilot-otp-1')" onkeydown="handleOtpKey(event, 'pilot-otp-1')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="pilot-otp-3" oninput="handleOtpInput(this, 'pilot-otp-4', 'pilot-otp-2')" onkeydown="handleOtpKey(event, 'pilot-otp-2')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="pilot-otp-4" oninput="handleOtpInput(this, 'pilot-otp-5', 'pilot-otp-3')" onkeydown="handleOtpKey(event, 'pilot-otp-3')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="pilot-otp-5" oninput="handleOtpInput(this, 'pilot-otp-6', 'pilot-otp-4')" onkeydown="handleOtpKey(event, 'pilot-otp-4')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="pilot-otp-6" oninput="handleOtpInput(this, null, 'pilot-otp-5')" onkeydown="handleOtpKey(event, 'pilot-otp-5')">
+          </div>
+
+          <div class="otp-autofill-badge" id="pilot-autofill-btn" onclick="autoFillPilotOtp()">
+            ⚡ Click to Auto-Fill Received OTP: <strong id="pilot-autofill-code">719284</strong>
+          </div>
+
+          <div class="otp-resend-row">
+            <span id="pilot-timer-display">Resend code in <strong id="pilot-countdown">30s</strong></span>
+            <button type="button" class="btn-resend-otp" id="btn-pilot-resend" onclick="resendPilotOtp()" disabled>Resend OTP</button>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-pilot-verify" style="width: 100%; margin-top: 16px;">
+            🎉 Verify & Launch Command Center ➔
+          </button>
+
+          <button type="button" class="btn btn-secondary btn-sm" onclick="backToPilotDetails()" style="width: 100%; margin-top: 8px;">
+            ← Edit Store Details
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
-  <!-- Sign In Modal -->
+  <!-- Sign In Modal (Old Users with OTP) -->
   <div class="modal-overlay" id="login-modal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content">
       <button class="modal-close" onclick="closeLoginModal()">&times;</button>
-      <div style="text-align: center; margin-bottom: 20px;">
-        <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
-        <h3 style="font-size: 1.4rem; font-weight: 800;">Sign In to Store Dashboard</h3>
-        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
-          Enter your email or log in instantly as a demo store.
-        </p>
+      
+      <!-- STEP 1: Enter Phone / Email -->
+      <div id="login-step-credentials">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div class="logo-badge" style="margin: 0 auto 12px;">🛡️</div>
+          <h3 style="font-size: 1.4rem; font-weight: 800;">Sign In to Store Dashboard</h3>
+          <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
+            Enter your registered mobile number or email for instant OTP sign in.
+          </p>
+        </div>
+
+        <form onsubmit="handleLoginRequestOtp(event)">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Mobile Phone or Work Email</label>
+              <input type="text" id="login-identifier-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="+91 98765 43210 or founder@store.in" required value="+91 98765 43210">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-login-send-otp" style="width: 100%;">
+              ⚡ Send OTP Verification Code ➔
+            </button>
+            <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 4px 0;">— OR —</div>
+            <button type="button" class="btn btn-secondary" onclick="quickLoginDemoStore()" style="width: 100%;">
+              ⚡ Quick Demo Sign In (AeroKicks Apparel)
+            </button>
+          </div>
+        </form>
       </div>
 
-      <form onsubmit="handleLoginSubmit(event)">
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          <div>
-            <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Work Email</label>
-            <input type="email" id="login-email-input" class="custom-input" style="width: 100%; margin-top: 4px;" placeholder="founder@yourstore.com" required value="founder@aerokicks.com">
-          </div>
-          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-            Sign In to Dashboard ➔
-          </button>
-          <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 4px 0;">— OR —</div>
-          <button type="button" class="btn btn-secondary" onclick="quickLoginDemoStore()" style="width: 100%;">
-            ⚡ Quick Demo Sign In (AeroKicks Apparel)
-          </button>
+      <!-- STEP 2: OTP Verification Screen -->
+      <div id="login-step-otp" style="display: none;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div class="auth-badge-header">🔒 2-Factor OTP Verification</div>
+          <h3 style="font-size: 1.35rem; font-weight: 800;">Enter 6-Digit OTP</h3>
+          <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
+            Verification code sent to <strong id="login-otp-target-display" style="color: #a5b4fc;">+91 98765 43210</strong>
+          </p>
         </div>
-      </form>
+
+        <form onsubmit="handleLoginVerifyOtp(event)">
+          <div class="otp-container" id="login-otp-boxes">
+            <input type="text" maxlength="1" class="otp-digit-input" id="login-otp-1" oninput="handleOtpInput(this, 'login-otp-2', null)" onkeydown="handleOtpKey(event, null)">
+            <input type="text" maxlength="1" class="otp-digit-input" id="login-otp-2" oninput="handleOtpInput(this, 'login-otp-3', 'login-otp-1')" onkeydown="handleOtpKey(event, 'login-otp-1')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="login-otp-3" oninput="handleOtpInput(this, 'login-otp-4', 'login-otp-2')" onkeydown="handleOtpKey(event, 'login-otp-2')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="login-otp-4" oninput="handleOtpInput(this, 'login-otp-5', 'login-otp-3')" onkeydown="handleOtpKey(event, 'login-otp-3')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="login-otp-5" oninput="handleOtpInput(this, 'login-otp-6', 'login-otp-4')" onkeydown="handleOtpKey(event, 'login-otp-4')">
+            <input type="text" maxlength="1" class="otp-digit-input" id="login-otp-6" oninput="handleOtpInput(this, null, 'login-otp-5')" onkeydown="handleOtpKey(event, 'login-otp-5')">
+          </div>
+
+          <div class="otp-autofill-badge" id="login-autofill-btn" onclick="autoFillLoginOtp()">
+            ⚡ Click to Auto-Fill Received OTP: <strong id="login-autofill-code">482910</strong>
+          </div>
+
+          <div class="otp-resend-row">
+            <span id="login-timer-display">Resend code in <strong id="login-countdown">30s</strong></span>
+            <button type="button" class="btn-resend-otp" id="btn-login-resend" onclick="resendLoginOtp()" disabled>Resend OTP</button>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-login-verify" style="width: 100%; margin-top: 16px;">
+            🔒 Verify & Sign In ➔
+          </button>
+
+          <button type="button" class="btn btn-secondary btn-sm" onclick="backToLoginCredentials()" style="width: 100%; margin-top: 8px;">
+            ← Change Phone / Email
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
